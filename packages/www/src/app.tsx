@@ -1,3 +1,4 @@
+import yaml from 'js-yaml'
 import { useEffect, useState } from 'preact/hooks'
 
 export function App() {
@@ -24,12 +25,14 @@ export function App() {
 
     setLoading(true)
     ;(async () => {
-      if (!q.trim()) {
+      if (q.trimStart().length < 3) {
         setPage(1)
         setContent([])
       }
 
-      const r1 = await fetch(`/api/q?q=${q}&page=${page}&limit=${limit}`)
+      const r1 = await fetch(
+        `/api/q?q=${q.trimStart()}&page=${page}&limit=${limit}`,
+      )
       if (!r1.ok) {
         setPage(1)
         setContent([])
@@ -71,7 +74,7 @@ export function App() {
         <div>
           {contents.length ? (
             contents.map((c) => (
-              <div className="emoji" title={c.description}>
+              <div className="emoji" title={yaml.dump(c.description)}>
                 {c.text}
               </div>
             ))

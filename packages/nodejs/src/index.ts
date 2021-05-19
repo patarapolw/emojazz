@@ -1,3 +1,4 @@
+import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 
@@ -6,8 +7,9 @@ import cors from 'fastify-cors'
 import fastifyStatic from 'fastify-static'
 import yaml from 'js-yaml'
 import S from 'jsonschema-definer'
+import lunr from 'lunr'
 
-import { makeSearch } from './shared'
+import { sSearch, tSearch } from './shared'
 
 async function main() {
   const app = fastify({
@@ -36,10 +38,59 @@ async function main() {
 
   app.register(
     async (f) => {
-      const idx = makeSearch()
-      idx.import(
-        fs.readFileSync(path.join(__dirname, '../assets/idx.txt'), 'utf-8'),
-      )
+      const searchObject = S.object()
+        .additionalProperties(sSearch)
+        .ensure(
+          yaml.load(
+            fs.readFileSync(
+              path.join(__dirname, '../assets/search.yaml'),
+              'utf-8',
+            ),
+          ) as any,
+        )
+
+      let idx: lunr.Index
+      if (
+        fs.existsSync('assets/idx.json') &&
+        fs.existsSync('assets/idx.hash') &&
+        crypto
+          .createHash('sha256')
+          .update(yaml.dump(searchObject, { sortKeys: true }))
+          .digest()
+          .toString('base64') === fs.readFileSync('assets/idx.hash', 'utf-8')
+      ) {
+        idx = lunr.Index.load(
+          JSON.parse(fs.readFileSync('assets/idx.json', 'utf-8')),
+        )
+      } else {
+        idx = lunr(function () {
+          this.ref('text')
+          this.field('u')
+          this.field('c')
+          this.field('d')
+          this.field('t')
+
+          Object.entries(searchObject).map(([text, r]) => {
+            this.add({
+              text,
+              u: r.unicode,
+              c: r.categories,
+              d: Object.values(r.description).join('\n'),
+              t: r.tag,
+            })
+          })
+        })
+
+        fs.writeFileSync('assets/idx.json', JSON.stringify(idx))
+        fs.writeFileSync(
+          'assets/idx.hash',
+          crypto
+            .createHash('sha256')
+            .update(yaml.dump(searchObject, { sortKeys: true }))
+            .digest()
+            .toString('base64'),
+        )
+      }
 
       const imageObject = S.object()
         .additionalProperties(S.list(S.string()))
@@ -59,11 +110,13 @@ async function main() {
           limit: S.integer().optional(),
         })
 
+        sSearch.copyWith
+
         const sResponse = S.shape({
           result: S.list(
             S.shape({
               text: S.string(),
-              description: S.string(),
+              ...tSearch,
             }),
           ),
           count: S.integer(),
@@ -82,19 +135,26 @@ async function main() {
             },
           },
           async (req): Promise<typeof sResponse.type> => {
-            const { q = '', page = 1, limit = 50 } = req.query
+            const { page = 1, limit = 50 } = req.query
+            let { q = '' } = req.query
+            q = q.trimLeft()
 
-            if (!q.trim()) {
+            if (!q) {
               return {
                 result: [],
                 count: 0,
               }
             }
 
-            const rs = await idx.search(q)
+            const rs = idx.search(/\s+$/.test(q) ? q : q + '*')
 
             return {
-              result: rs.slice((page - 1) * limit, page * limit),
+              result: rs
+                .map((r) => ({
+                  text: r.ref,
+                  ...searchObject[r.ref],
+                }))
+                .slice((page - 1) * limit, page * limit),
               count: rs.length,
             }
           },
@@ -107,7 +167,7 @@ async function main() {
         })
 
         const sResponse = S.shape({
-          description: S.string(),
+          ...tSearch,
           images: S.list(S.string()),
         })
 
@@ -126,7 +186,7 @@ async function main() {
           async (req): Promise<typeof sResponse.type> => {
             const { id } = req.query
 
-            const r1 = idx.where({ text: id })[0]
+            const r1 = searchObject[id]
 
             if (!r1) {
               throw { statusCode: 404 }
@@ -135,8 +195,8 @@ async function main() {
             const r2 = imageObject[id] || []
 
             return {
-              description: r1.description,
-              images: r2.map((f) => `/img/${f}`),
+              ...r1,
+              images: r2,
             }
           },
         )

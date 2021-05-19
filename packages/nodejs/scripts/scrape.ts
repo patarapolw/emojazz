@@ -6,7 +6,7 @@ import yaml from 'js-yaml'
 import S from 'jsonschema-definer'
 import sanitize from 'sanitize-filename'
 
-import { sSearch } from './shared'
+import { sSearch } from '../src/shared'
 
 async function doScrape(url: string) {
   const $ = cheerio.load(await axios.get(url).then((r) => r.data))
@@ -48,10 +48,8 @@ async function doScrape(url: string) {
         const unicode = $($tds[1]).text().trim()
         const text = $($tds[2]).text().trim()
 
-        const description: Record<string, string> = {
-          main: bighead,
-          sub: mediumhead,
-        }
+        const categories = [bighead, mediumhead]
+        const description: Record<string, string> = {}
 
         $tds.each((i, td) => {
           if (i > 2) {
@@ -67,7 +65,7 @@ async function doScrape(url: string) {
                 fs.writeFileSync(`assets/img/${filename}`, data)
 
                 const imgs = imageObject[text] || []
-                imgs.push(filename)
+                imgs.push(`/img/${filename}`)
                 imageObject[text] = imgs
               } else {
                 console.log(imgSrc)
@@ -81,7 +79,7 @@ async function doScrape(url: string) {
                     fs.writeFileSync(`assets/img/${filename}`, data)
 
                     const imgs = imageObject[text] || []
-                    imgs.push(filename)
+                    imgs.push(`/img/${filename}`)
                     imageObject[text] = imgs
                   } else {
                     console.error(`Cannot write: ${imgSrc}`)
@@ -98,18 +96,24 @@ async function doScrape(url: string) {
           }
         })
 
-        if (!searchObject[text]) {
+        const p = searchObject[text]
+
+        if (!p) {
           searchObject[text] = {
-            unicode,
+            unicode: unicode.split(/\s+/g),
+            categories,
             description,
+            tag: [],
           }
         } else {
           searchObject[text] = {
-            unicode,
+            unicode: unicode.split(/\s+/g),
+            categories: [...new Set([...p.categories, ...categories])],
             description: {
-              ...searchObject[text].description,
+              ...p.description,
               ...description,
             },
+            tag: p.tag,
           }
         }
       }
@@ -125,10 +129,11 @@ async function doScrape(url: string) {
 }
 
 if (require.main === module) {
-  doScrape('https://www.unicode.org/emoji/charts/full-emoji-list.html').then(
-    () =>
+  doScrape('https://www.unicode.org/emoji/charts/full-emoji-list.html')
+    .then(() =>
       doScrape(
         'https://www.unicode.org/emoji/charts/full-emoji-modifiers.html',
       ),
-  )
+    )
+    .catch((e) => console.error(e))
 }

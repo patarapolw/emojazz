@@ -8,10 +8,12 @@
     "serve": "vite preview"
   },
   "dependencies": {
+    "js-yaml": "^4.1.0",
     "preact": "^10.5.13"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.1.0",
+    "@types/js-yaml": "^4.0.1",
     "import-sort-parser-typescript": "^6.0.0",
     "sass": "^1.32.13",
     "typescript": "^4.2.4",
