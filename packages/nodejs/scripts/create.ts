@@ -3,19 +3,16 @@ import fs from 'fs'
 import axios from 'axios'
 import sqlite3 from 'better-sqlite3'
 import cheerio from 'cheerio'
+import yaml from 'js-yaml'
 import sanitize from 'sanitize-filename'
 
+import { sSearch } from './shared'
+
 async function main() {
-  const sql = sqlite3('assets/emoji.db')
+  const sql = sqlite3('assets/search.db')
 
   sql.exec(/* sql */ `
-  CREATE VIRTUAL TABLE IF NOT EXISTS q USING fts5(
-    [text],
-    [description],
-    tokenize = 'porter unicode61'
-  );
-
-  CREATE TABLE IF NOT EXISTS q_image (
+  CREATE TABLE IF NOT EXISTS [image] (
     [text]        TEXT NOT NULL,
     [filename]    TEXT NOT NULL,
     PRIMARY KEY ([text], [filename])
@@ -24,20 +21,18 @@ async function main() {
 
   const $ = cheerio.load(
     await axios
+      // 'https://www.unicode.org/emoji/charts/full-emoji-modifiers.html'
       .get('https://www.unicode.org/emoji/charts/full-emoji-list.html')
       .then((r) => r.data),
   )
 
   const stmtAssociateFile = sql.prepare(/* sql */ `
-  INSERT INTO q_image ([text], [filename])
+  INSERT INTO image ([text], [filename])
   VALUES (@text, @filename)
   ON CONFLICT DO NOTHING
   `)
-  const stmtRow = sql.prepare(/* sql */ `
-  INSERT INTO q ([text], [description])
-  SELECT @text, @description
-  WHERE NOT EXISTS (SELECT 1 FROM q WHERE [text] = @text)
-  `)
+
+  const searchArray = [] as typeof sSearch.type[]
 
   sql.transaction(() => {
     $('table').each((_, t) => {
@@ -50,8 +45,8 @@ async function main() {
       $t.find('tr').each((_, tr) => {
         const $tr = $(tr)
 
-        bighead = $tr.find('.bighead').text()
-        mediumhead = $tr.find('.mediumhead').text()
+        bighead = bighead || $tr.find('.bighead').text().trim()
+        mediumhead = mediumhead || $tr.find('.mediumhead').text().trim()
 
         const $ths = $tr.find('th')
         const $tds = $tr.find('td')
@@ -64,10 +59,13 @@ async function main() {
           const unicode = $($tds[1]).text().trim()
           const text = $($tds[2]).text().trim()
 
-          const description = [bighead, mediumhead]
+          const description: Record<string, string> = {
+            main: bighead,
+            sub: mediumhead,
+          }
 
           $tds.each((i, td) => {
-            if (i > 0 && i !== 2) {
+            if (i > 2) {
               const $td = $(td)
               const imgSrc = $td.find('img').attr('src')
 
@@ -99,32 +97,27 @@ async function main() {
                 const desc = $td.text()
 
                 if (/[A-Z0-9]/i.test(desc)) {
-                  description.push(`${header[i]}: ${desc}`)
+                  description[header[i]] = desc
                 }
               }
             }
           })
 
-          // console.log(text)
-
-          const d = description
-            .map((s) => s.trim())
-            .filter((s) => s)
-            .join('\n')
-
-          // console.log(d)
-          // console.log('\n')
-
-          stmtRow.run({
-            text,
-            description: d,
-          })
+          searchArray.push(
+            sSearch.ensure({
+              text,
+              unicode,
+              description,
+            }),
+          )
         }
       })
     })
   })()
 
   sql.close()
+
+  fs.writeFileSync('assets/search.yaml', yaml.dump(searchArray))
 }
 
 if (require.main === module) {

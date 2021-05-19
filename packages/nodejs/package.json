@@ -16,10 +16,12 @@
   "devDependencies": {
     "@types/better-sqlite3": "^5.4.1",
     "@types/cheerio": "^0.22.28",
+    "@types/js-yaml": "^4.0.1",
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.9",
     "fastify-cors": "^6.0.1",
     "import-sort-parser-typescript": "^6.0.0",
+    "js-yaml": "^4.1.0",
     "sanitize-filename": "^1.6.3",
     "ts-node": "^9.1.1",
     "ts-node-dev": "^1.1.6",

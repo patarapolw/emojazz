@@ -33,7 +33,7 @@ async function main() {
 
   app.register(
     async (f) => {
-      const sql = sqlite(path.join(__dirname, '../assets/emoji.db'), {
+      const sql = sqlite(path.join(__dirname, '../assets/search.db'), {
         readonly: true,
       })
 
@@ -75,7 +75,7 @@ async function main() {
               .prepare(
                 /* sql */ `
             WITH cte AS (
-              SELECT DISTINCT [text] FROM q WHERE q MATCH @q ORDER BY RANK
+              SELECT DISTINCT [text] FROM q WHERE q LIKE @q||'%' ORDER BY RANK
             )
 
             SELECT
