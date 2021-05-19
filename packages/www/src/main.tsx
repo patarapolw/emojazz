@@ -1,5 +1,7 @@
-import { render } from 'preact'
-import { App } from './app'
 import './index.scss'
+
+import { render } from 'preact'
+
+import { App } from './app'
 
 render(<App />, document.getElementById('app')!)

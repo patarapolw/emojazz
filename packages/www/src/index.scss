@@ -1,3 +1,28 @@
+@font-face {
+  font-family: 'noto';
+  src: url('/src/assets/NotoSans-Regular.otf');
+}
+
+@font-face {
+  font-family: 'noto-sc';
+  src: url('/src/assets/NotoSansCJKsc-Regular.otf');
+}
+
+@font-face {
+  font-family: 'noto-tc';
+  src: url('/src/assets/NotoSansCJKtc-Regular.otf');
+}
+
+@font-face {
+  font-family: 'noto-jp';
+  src: url('/src/assets/NotoSansCJKjp-Regular.otf');
+}
+
+@font-face {
+  font-family: 'emoji';
+  src: url('/src/assets/NotoColorEmoji.ttf');
+}
+
 html,
 body {
   padding: 0;
@@ -7,12 +32,7 @@ body {
 
 * {
   font-size: 16px;
-  font-family: 'Noto Sans', sans-serif;
-}
-
-@font-face {
-  font-family: 'emoji';
-  src: url('/src/assets/NotoColorEmoji.ttf');
+  font-family: 'noto', 'noto-jp', 'noto-sc', 'noto-tc', 'Noto Sans', sans-serif;
 }
 
 .emoji {

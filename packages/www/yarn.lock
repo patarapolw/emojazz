@@ -411,6 +411,13 @@ has@^1.0.3:
   dependencies:
     function-bind "^1.1.1"
 
+import-sort-parser-typescript@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/import-sort-parser-typescript/-/import-sort-parser-typescript-6.0.0.tgz#98e73cef9e077d073e798722ed59e215b51c17e2"
+  integrity sha512-pgxnr3I156DonupQriNsgDb2zJN9TxrqCCIN1rwT/6SDO1rkJb+a0fjqshCjlgacTSA92oPAp1eAwmQUeZi3dw==
+  dependencies:
+    typescript "^3.2.4"
+
 is-binary-path@~2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/is-binary-path/-/is-binary-path-2.1.0.tgz#ea1f7f3b80f064236e83470f86c09c254fb45b09"
@@ -580,6 +587,11 @@ to-regex-range@^5.0.1:
   integrity sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==
   dependencies:
     is-number "^7.0.0"
+
+typescript@^3.2.4:
+  version "3.9.9"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.9.tgz#e69905c54bc0681d0518bd4d587cc6f2d0b1a674"
+  integrity sha512-kdMjTiekY+z/ubJCATUPlRDl39vXYiMV9iyeMuEuXZh2we6zz80uovNN2WlAxmmdE/Z/YQe+EbOEXB5RHEED3w==
 
 typescript@^4.2.4:
   version "4.2.4"
