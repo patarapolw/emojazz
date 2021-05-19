@@ -1,0 +1,83 @@
+html,
+body {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+* {
+  font-size: 16px;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif,
+    'emoji';
+}
+
+@font-face {
+  font-family: 'emoji';
+  src: url('/assets/NotoColorEmoji.ttf');
+}
+
+.emoji {
+  font-family: 'emoji';
+}
+
+.hidden-scroll {
+  overflow: scroll;
+  scrollbar-width: 0;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+#app {
+  height: 700px;
+  max-height: 100vh;
+
+  width: 500px;
+  max-width: 100vw;
+
+  text-align: center;
+  background-color: #673ab8;
+  color: #fff;
+  font-size: 1.5em;
+  padding-top: 1px;
+
+  display: flex;
+  flex-direction: column;
+
+  form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    input#q {
+      flex-grow: 1;
+      min-width: 400px;
+      margin: 0.5em;
+      margin-right: 0;
+      padding: 0.5em;
+    }
+
+    button[type='submit'] {
+      margin: 0.5em;
+      padding: 0.5em;
+      border: none;
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+      background-color: #fcfcfc;
+
+      &:hover {
+        background-color: rgb(221, 234, 238);
+      }
+
+      &:active {
+        top: 2px;
+      }
+    }
+  }
+}
+
+.link {
+  color: #fff;
+}
