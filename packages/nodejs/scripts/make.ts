@@ -27,8 +27,8 @@ async function main() {
 
   fs.writeFileSync('assets/idx.txt', idx.export())
 
-  console.log(await idx.search('smil'))
-  console.log(idx.where({ description: 'smil' }))
+  // console.log(await idx.search('smil'))
+  // console.log(idx.where({ description: 'smil' }))
 }
 
 if (require.main === module) {

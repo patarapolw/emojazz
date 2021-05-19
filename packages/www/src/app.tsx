@@ -88,9 +88,14 @@ export function App() {
               🢐
             </button>
           </li>
-          <li>{page}</li>
+          <li>
+            {page} / {Math.ceil(count / limit)}
+          </li>
           <li
-            style={{ visibility: page < count / limit ? 'visible' : 'hidden' }}
+            style={{
+              visibility:
+                page < Math.ceil(count / limit) ? 'visible' : 'hidden',
+            }}
           >
             <button type="button" onClick={() => setPage(page + 1)}>
               🢒

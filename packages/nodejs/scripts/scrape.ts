@@ -34,8 +34,8 @@ async function doScrape(url: string) {
     $t.find('tr').each((_, tr) => {
       const $tr = $(tr)
 
-      bighead = bighead || $tr.find('.bighead').text().trim()
-      mediumhead = mediumhead || $tr.find('.mediumhead').text().trim()
+      bighead = $tr.find('.bighead').text().trim() || bighead
+      mediumhead = $tr.find('.mediumhead').text().trim() || mediumhead
 
       const $ths = $tr.find('th')
       const $tds = $tr.find('td')
