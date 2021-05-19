@@ -1,8 +1,9 @@
 import yaml from 'js-yaml'
+import { createRef } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 
 export function App() {
-  const [contents, setContent] = useState(
+  const [content, setContent] = useState(
     [] as {
       text: string
       description: string
@@ -13,19 +14,25 @@ export function App() {
   const [count, setCount] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  const limit = 40
+  const rContainer = createRef<HTMLDivElement>()
 
-  const setP = () => {
+  const limit = 100
+
+  const doFetch = (
+    opts: {
+      prev?: any[]
+    } = {},
+  ) => {
     if (loading) {
       setTimeout(() => {
-        setP()
+        doFetch(opts)
       }, 500)
       return
     }
 
     setLoading(true)
     ;(async () => {
-      if (q.trimStart().length < 3) {
+      if (!q.trimStart()) {
         setPage(1)
         setContent([])
       }
@@ -40,19 +47,48 @@ export function App() {
 
       const r2 = await r1.json()
 
-      const c = r2.result
+      const c = [...(opts.prev || []), ...r2.result]
       setContent(c)
       setCount(r2.count)
 
-      if (!c.length) {
-        setPage(1)
+      if (opts.prev) {
+        const prevSet = new Set(opts.prev)
+        const dupl = r2.result.filter((r: string) => prevSet.has(r))
+        if (dupl.length) {
+          console.error('Duplicates: ', dupl)
+        }
       }
-    })().finally(() => setLoading(false))
+    })().finally(() => {
+      setLoading(false)
+    })
   }
 
   useEffect(() => {
-    setP()
-  }, [q, page])
+    doFetch()
+  }, [q])
+
+  useEffect(() => {
+    doFetch({ prev: content })
+  }, [page])
+
+  useEffect(() => {
+    const el = rContainer.current
+    if (el) {
+      el.onscroll = () => {
+        if (
+          content.length < count &&
+          el.scrollHeight - el.scrollTop - el.clientHeight < 50
+        ) {
+          setPage(page + 1)
+        }
+      }
+
+      if (el.scrollHeight <= el.clientHeight) {
+        el.scrollTop = 0
+        setPage(1)
+      }
+    }
+  }, [page, content])
 
   return (
     <>
@@ -71,11 +107,22 @@ export function App() {
       </form>
 
       <div className="container">
-        <div>
-          {contents.length ? (
-            contents.map((c) => (
-              <div className="emoji" title={yaml.dump(c.description)}>
-                {c.text}
+        <div ref={rContainer}>
+          {content.length ? (
+            content.map(({ text, ...c }) => (
+              <div
+                className="emoji"
+                title={yaml.dump(c, {
+                  replacer: (_, v) => {
+                    if (!String(v)) {
+                      return undefined
+                    }
+                    return v
+                  },
+                  skipInvalid: true,
+                })}
+              >
+                {text}
               </div>
             ))
           ) : page === 1 ? (
@@ -83,29 +130,6 @@ export function App() {
           ) : null}
         </div>
       </div>
-
-      {count > limit ? (
-        <ul className="pagination">
-          <li style={{ visibility: page > 1 ? 'visible' : 'hidden' }}>
-            <button type="button" onClick={() => setPage(page - 1)}>
-              🢐
-            </button>
-          </li>
-          <li>
-            {page} / {Math.ceil(count / limit)}
-          </li>
-          <li
-            style={{
-              visibility:
-                page < Math.ceil(count / limit) ? 'visible' : 'hidden',
-            }}
-          >
-            <button type="button" onClick={() => setPage(page + 1)}>
-              🢒
-            </button>
-          </li>
-        </ul>
-      ) : null}
     </>
   )
 }
