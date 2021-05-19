@@ -1,26 +1,44 @@
-import { useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 
 export function App() {
   const [contents, updateContents] = useState([] as string[])
   const [q, updateQ] = useState('')
+  const [loading, updateLoading] = useState(false)
+
+  const setP = () => {
+    if (loading) {
+      setTimeout(() => {
+        setP()
+      }, 500)
+      return
+    }
+
+    updateLoading(true)
+
+    ;(async () => {
+      if (!q.trim()) {
+        updateContents([])
+      }
+
+      const r1 = await fetch(`/api/q?q=${q}&limit=100`)
+      if (!r1.ok) {
+        updateContents([])
+      }
+
+      const r2 = await r1.json()
+      updateContents(r2.result)
+    })().finally(() => updateLoading(false))
+  }
+
+  useEffect(() => {
+    setP()
+  }, [q])
 
   return (
     <>
       <form
         onSubmit={async (e) => {
           e.preventDefault()
-
-          if (!q.trim()) {
-            updateContents([])
-          }
-
-          const r1 = await fetch(`/api/q?q=${q}&limit=100`)
-          if (!r1.ok) {
-            updateContents([])
-          }
-
-          const r2 = await r1.json()
-          updateContents(r2.result)
         }}
       >
         <input
@@ -30,9 +48,6 @@ export function App() {
           value={q}
           onInput={(e) => updateQ((e.target as HTMLInputElement).value)}
         />
-        <button type="submit">
-          <span className="emoji">🔍</span>
-        </button>
       </form>
 
       <div className="container">

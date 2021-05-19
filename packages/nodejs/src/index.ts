@@ -64,7 +64,7 @@ async function main() {
           async (req): Promise<typeof sResponse.type> => {
             const { q = '', page = 1, limit = 20 } = req.query
 
-            if (!q.trim()) {
+            if (q.trim().length < 3) {
               return {
                 result: [],
                 count: 0,
@@ -75,7 +75,7 @@ async function main() {
               .prepare(
                 /* sql */ `
             WITH cte AS (
-              SELECT DISTINCT [text] FROM q WHERE q LIKE @q||'%' ORDER BY RANK
+              SELECT DISTINCT [text] FROM q WHERE q MATCH @q ORDER BY RANK
             )
 
             SELECT

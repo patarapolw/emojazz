@@ -4,6 +4,7 @@ import axios from 'axios'
 import sqlite3 from 'better-sqlite3'
 import cheerio from 'cheerio'
 import yaml from 'js-yaml'
+import S from 'jsonschema-definer'
 import sanitize from 'sanitize-filename'
 
 import { sSearch } from './shared'
@@ -21,8 +22,8 @@ async function main() {
 
   const $ = cheerio.load(
     await axios
-      // 'https://www.unicode.org/emoji/charts/full-emoji-modifiers.html'
-      .get('https://www.unicode.org/emoji/charts/full-emoji-list.html')
+      // .get('https://www.unicode.org/emoji/charts/full-emoji-list.html')
+      .get('https://www.unicode.org/emoji/charts/full-emoji-modifiers.html')
       .then((r) => r.data),
   )
 
@@ -32,7 +33,13 @@ async function main() {
   ON CONFLICT DO NOTHING
   `)
 
-  const searchArray = [] as typeof sSearch.type[]
+  const searchObject = fs.existsSync('assets/search.yaml')
+    ? S.object()
+        .additionalProperties(sSearch)
+        .ensure(
+          yaml.load(fs.readFileSync('assets/search.yaml', 'utf-8')) as any,
+        )
+    : {}
 
   sql.transaction(() => {
     $('table').each((_, t) => {
@@ -103,13 +110,20 @@ async function main() {
             }
           })
 
-          searchArray.push(
-            sSearch.ensure({
-              text,
+          if (!searchObject[text]) {
+            searchObject[text] = {
               unicode,
               description,
-            }),
-          )
+            }
+          } else {
+            searchObject[text] = {
+              unicode,
+              description: {
+                ...searchObject[text].description,
+                ...description,
+              },
+            }
+          }
         }
       })
     })
@@ -117,7 +131,7 @@ async function main() {
 
   sql.close()
 
-  fs.writeFileSync('assets/search.yaml', yaml.dump(searchArray))
+  fs.writeFileSync('assets/search.yaml', yaml.dump(searchObject))
 }
 
 if (require.main === module) {
