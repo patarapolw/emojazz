@@ -1,9 +1,9 @@
 import fs from 'fs'
 
-import sqlite3 from 'better-sqlite3'
 import yaml from 'js-yaml'
 import S from 'jsonschema-definer'
 
+import { makeSearch } from '../src/shared'
 import { sSearch } from './shared'
 
 async function main() {
@@ -11,46 +11,24 @@ async function main() {
     .additionalProperties(sSearch)
     .ensure(yaml.load(fs.readFileSync('assets/search.yaml', 'utf-8')) as any)
 
-  const sql = sqlite3('assets/search.db')
+  const idx = makeSearch()
 
-  sql.exec(/* sql */ `
-  CREATE VIRTUAL TABLE IF NOT EXISTS q USING fts5(
-    [text],
-    [description],
-    tokenize = 'porter trigram'
-  );
-  `)
+  Object.entries(searchObject).map(([text, r]) => {
+    const obj = {
+      text,
+      description: [
+        r.unicode.replace(/U\+/gi, ''),
+        ...Object.values(r.description),
+      ].join('\n'),
+    }
 
-  const stmtInsert = sql.prepare(/* sql */ `
-  INSERT INTO q ([text], [description])
-  SELECT @text, @description
-  `)
+    idx.add(obj)
+  })
 
-  const stmtUpdate = sql.prepare(/* sql */ `
-  UPDATE q
-  SET [description] = @description
-  WHERE [text] = @text
-  `)
+  fs.writeFileSync('assets/idx.txt', idx.export())
 
-  sql.transaction(() => {
-    Object.entries(searchObject).map(([text, r]) => {
-      const obj = {
-        text,
-        description: [
-          r.unicode.replace(/U\+/gi, ''),
-          ...Object.values(r.description),
-        ].join('\n'),
-      }
-
-      const { changes } = stmtUpdate.run(obj)
-
-      if (!changes) {
-        stmtInsert.run(obj)
-      }
-    })
-  })()
-
-  sql.close()
+  console.log(await idx.search('smil'))
+  console.log(idx.where({ description: 'smil' }))
 }
 
 if (require.main === module) {

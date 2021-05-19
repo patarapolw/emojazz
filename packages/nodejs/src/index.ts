@@ -1,10 +1,13 @@
+import fs from 'fs'
 import path from 'path'
 
-import sqlite from 'better-sqlite3'
 import fastify from 'fastify'
 import cors from 'fastify-cors'
 import fastifyStatic from 'fastify-static'
+import yaml from 'js-yaml'
 import S from 'jsonschema-definer'
+
+import { makeSearch } from './shared'
 
 async function main() {
   const app = fastify({
@@ -33,9 +36,21 @@ async function main() {
 
   app.register(
     async (f) => {
-      const sql = sqlite(path.join(__dirname, '../assets/search.db'), {
-        readonly: true,
-      })
+      const idx = makeSearch()
+      idx.import(
+        fs.readFileSync(path.join(__dirname, '../assets/idx.txt'), 'utf-8'),
+      )
+
+      const imageObject = S.object()
+        .additionalProperties(S.list(S.string()))
+        .ensure(
+          yaml.load(
+            fs.readFileSync(
+              path.join(__dirname, '../assets/image.yaml'),
+              'utf-8',
+            ),
+          ) as any,
+        )
 
       {
         const sQuery = S.shape({
@@ -45,7 +60,12 @@ async function main() {
         })
 
         const sResponse = S.shape({
-          result: S.list(S.string()),
+          result: S.list(
+            S.shape({
+              text: S.string(),
+              description: S.string(),
+            }),
+          ),
           count: S.integer(),
         })
 
@@ -64,48 +84,18 @@ async function main() {
           async (req): Promise<typeof sResponse.type> => {
             const { q = '', page = 1, limit = 20 } = req.query
 
-            if (q.trim().length < 3) {
+            if (!q.trim()) {
               return {
                 result: [],
                 count: 0,
               }
             }
 
-            const r = sql
-              .prepare(
-                /* sql */ `
-            WITH cte AS (
-              SELECT DISTINCT [text] FROM q WHERE q MATCH @q ORDER BY RANK
-            )
-
-            SELECT
-              (
-                SELECT json_group_array([text])
-                FROM (
-                  SELECT [text]
-                  FROM cte
-                  LIMIT ${limit}
-                  OFFSET ${(page - 1) * limit}
-                )
-              ) result,
-              (
-                SELECT COUNT(1)
-                FROM cte
-              ) [count]
-            `,
-              )
-              .get({ q })
-
-            if (!r) {
-              return {
-                result: [],
-                count: 0,
-              }
-            }
+            const rs = await idx.search(q)
 
             return {
-              result: JSON.parse(r.result),
-              count: r.count,
+              result: rs.slice((page - 1) * limit, limit),
+              count: rs.length,
             }
           },
         )
@@ -136,30 +126,17 @@ async function main() {
           async (req): Promise<typeof sResponse.type> => {
             const { id } = req.query
 
-            const r1 = sql
-              .prepare(
-                /* sql */ `
-              SELECT group_concat([description], '\n\n') [description]
-              FROM q WHERE [text] = @id
-              `,
-              )
-              .get({ id })
+            const r1 = idx.where({ text: id })[0]
 
             if (!r1) {
               throw { statusCode: 404 }
             }
 
-            const r2 = sql
-              .prepare(
-                /* sql */ `
-              SELECT [filename] FROM q_image WHERE [text] = @id
-              `,
-              )
-              .all({ id })
+            const r2 = imageObject[id] || []
 
             return {
               description: r1.description,
-              images: r2.map(({ filename }) => `/img/${filename}`),
+              images: r2.map((f) => `/img/${f}`),
             }
           },
         )

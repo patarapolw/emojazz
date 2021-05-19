@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'preact/hooks'
 
 export function App() {
-  const [contents, updateContents] = useState([] as string[])
+  const [contents, updateContents] = useState(
+    [] as {
+      text: string
+      description: string
+    }[],
+  )
   const [q, updateQ] = useState('')
   const [loading, updateLoading] = useState(false)
 
@@ -14,7 +19,6 @@ export function App() {
     }
 
     updateLoading(true)
-
     ;(async () => {
       if (!q.trim()) {
         updateContents([])
@@ -52,7 +56,11 @@ export function App() {
 
       <div className="container">
         {contents.length ? (
-          contents.map((c) => <div className="emoji">{c}</div>)
+          contents.map((c) => (
+            <div className="emoji" title={c.description}>
+              {c.text}
+            </div>
+          ))
         ) : (
           <div class="nothing">Nothing here 🤣🤣🤣</div>
         )}
