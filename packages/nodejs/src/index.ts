@@ -82,7 +82,7 @@ async function main() {
             },
           },
           async (req): Promise<typeof sResponse.type> => {
-            const { q = '', page = 1, limit = 20 } = req.query
+            const { q = '', page = 1, limit = 50 } = req.query
 
             if (!q.trim()) {
               return {
@@ -94,7 +94,7 @@ async function main() {
             const rs = await idx.search(q)
 
             return {
-              result: rs.slice((page - 1) * limit, limit),
+              result: rs.slice((page - 1) * limit, page * limit),
               count: rs.length,
             }
           },

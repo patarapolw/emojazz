@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'preact/hooks'
 
 export function App() {
-  const [contents, updateContents] = useState(
+  const [contents, setContent] = useState(
     [] as {
       text: string
       description: string
     }[],
   )
-  const [q, updateQ] = useState('')
-  const [loading, updateLoading] = useState(false)
+  const [q, setQ] = useState('')
+  const [page, setPage] = useState(1)
+  const [count, setCount] = useState(0)
+  const [loading, setLoading] = useState(false)
+
+  const limit = 40
 
   const setP = () => {
     if (loading) {
@@ -18,25 +22,34 @@ export function App() {
       return
     }
 
-    updateLoading(true)
+    setLoading(true)
     ;(async () => {
       if (!q.trim()) {
-        updateContents([])
+        setPage(1)
+        setContent([])
       }
 
-      const r1 = await fetch(`/api/q?q=${q}&limit=100`)
+      const r1 = await fetch(`/api/q?q=${q}&page=${page}&limit=${limit}`)
       if (!r1.ok) {
-        updateContents([])
+        setPage(1)
+        setContent([])
       }
 
       const r2 = await r1.json()
-      updateContents(r2.result)
-    })().finally(() => updateLoading(false))
+
+      const c = r2.result
+      setContent(c)
+      setCount(r2.count)
+
+      if (!c.length) {
+        setPage(1)
+      }
+    })().finally(() => setLoading(false))
   }
 
   useEffect(() => {
     setP()
-  }, [q])
+  }, [q, page])
 
   return (
     <>
@@ -50,21 +63,41 @@ export function App() {
           name="q"
           id="q"
           value={q}
-          onInput={(e) => updateQ((e.target as HTMLInputElement).value)}
+          onInput={(e) => setQ((e.target as HTMLInputElement).value)}
         />
       </form>
 
       <div className="container">
-        {contents.length ? (
-          contents.map((c) => (
-            <div className="emoji" title={c.description}>
-              {c.text}
-            </div>
-          ))
-        ) : (
-          <div class="nothing">Nothing here 🤣🤣🤣</div>
-        )}
+        <div>
+          {contents.length ? (
+            contents.map((c) => (
+              <div className="emoji" title={c.description}>
+                {c.text}
+              </div>
+            ))
+          ) : page === 1 ? (
+            <div class="nothing">Nothing here 🤣🤣🤣</div>
+          ) : null}
+        </div>
       </div>
+
+      {count > limit ? (
+        <ul className="pagination">
+          <li style={{ visibility: page > 1 ? 'visible' : 'hidden' }}>
+            <button type="button" onClick={() => setPage(page - 1)}>
+              🢐
+            </button>
+          </li>
+          <li>{page}</li>
+          <li
+            style={{ visibility: page < count / limit ? 'visible' : 'hidden' }}
+          >
+            <button type="button" onClick={() => setPage(page + 1)}>
+              🢒
+            </button>
+          </li>
+        </ul>
+      ) : null}
     </>
   )
 }

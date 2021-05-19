@@ -49,15 +49,14 @@ body {
 }
 
 #app {
-  height: 700px;
+  height: 650px;
   max-height: 100vh;
 
   width: 500px;
   max-width: 100vw;
 
   text-align: center;
-  background-color: #673ab8;
-  color: #fff;
+  background-color: #ebebeb;
   font-size: 1.5em;
   padding-top: 1px;
 
@@ -78,26 +77,64 @@ body {
   }
 
   .container {
+    flex-grow: 1;
+
+    > * {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-height: 100%;
+      overflow: auto;
+
+      .emoji {
+        cursor: pointer;
+        font-size: 2em;
+        line-height: 2em;
+        width: 20%;
+        flex-grow: 0;
+      }
+
+      .nothing {
+        padding: 0.5em;
+        padding-top: 1em;
+
+        width: 100%;
+        margin: 0 auto;
+      }
+    }
+  }
+
+  .pagination {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    max-height: 100%;
-    overflow: auto;
 
-    .emoji {
-      cursor: pointer;
-      font-size: 2em;
-      line-height: 2em;
-      width: 20%;
+    margin: 0 auto;
+    list-style-type: none;
+
+    > * {
+      padding: 0.5em;
+      min-width: 2em;
     }
 
-    .nothing {
-      padding: 0.5em;
-      padding-top: 1em;
+    button {
+      all: unset;
+      cursor: pointer;
+      font-size: 1.2em;
+      width: 2em;
+      height: 2em;
+      border-radius: 50%;
+      position: relative;
 
-      width: 100%;
-      margin: 0 auto;
+      &:hover {
+        background-color: lightblue;
+      }
+
+      &:active {
+        top: 0.2em;
+      }
     }
   }
 }
