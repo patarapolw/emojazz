@@ -1,17 +1,14 @@
+import fs from 'fs'
+
 import axios from 'axios'
+import sqlite3 from 'better-sqlite3'
 import cheerio from 'cheerio'
 import sanitize from 'sanitize-filename'
-import sqlite3 from 'better-sqlite3'
 
 async function main() {
   const sql = sqlite3('assets/emoji.db')
 
   sql.exec(/* sql */ `
-  CREATE TABLE IF NOT EXISTS [image] (
-    [filename]    TEXT PRIMARY KEY NOT NULL,
-    [data]        BLOB NOT NULL
-  );
-
   CREATE VIRTUAL TABLE IF NOT EXISTS q USING fts5(
     [text],
     [description],
@@ -31,11 +28,6 @@ async function main() {
       .then((r) => r.data),
   )
 
-  const stmtWriteFile = sql.prepare(/* sql */ `
-  INSERT INTO [image] ([filename], [data])
-  VALUES (@filename, @data)
-  ON CONFLICT DO NOTHING
-  `)
   const stmtAssociateFile = sql.prepare(/* sql */ `
   INSERT INTO q_image ([text], [filename])
   VALUES (@text, @filename)
@@ -85,7 +77,7 @@ async function main() {
                   const filename = sanitize(`${unicode}-${header[i]}.${ext}`)
                   const data = Buffer.from(imgSrc.split(',')[1], 'base64')
 
-                  stmtWriteFile.run({ filename, data })
+                  fs.writeFileSync(`assets/img/${filename}`, data)
                   stmtAssociateFile.run({ text, filename })
                 } else {
                   console.log(imgSrc)
@@ -95,8 +87,8 @@ async function main() {
                   const filename = sanitize(imgSeg[imgSeg.length - 1])
                   axios.get(imgSrc).then((r) => {
                     const data = r.data
-                    if (data instanceof ArrayBuffer) {
-                      stmtWriteFile.run({ filename, data })
+                    if (data instanceof Buffer) {
+                      fs.writeFileSync(`assets/img/${filename}`, data)
                       stmtAssociateFile.run({ text, filename })
                     } else {
                       console.error(`Cannot write: ${imgSrc}`)
