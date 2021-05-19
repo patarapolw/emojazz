@@ -80,10 +80,13 @@ async function main() {
 
             SELECT
               (
-                SELECT json_agg([text])
-                FROM cte
-                LIMIT ${limit}
-                OFFSET ${(page - 1) * limit}
+                SELECT json_group_array([text])
+                FROM (
+                  SELECT [text]
+                  FROM cte
+                  LIMIT ${limit}
+                  OFFSET ${(page - 1) * limit}
+                )
               ) result,
               (
                 SELECT COUNT(1)

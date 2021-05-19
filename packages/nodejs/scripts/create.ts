@@ -36,7 +36,7 @@ async function main() {
   const stmtRow = sql.prepare(/* sql */ `
   INSERT INTO q ([text], [description])
   SELECT @text, @description
-  FROM q WHERE (SELECT 1 FROM q WHERE [text] = @text)
+  WHERE NOT EXISTS (SELECT 1 FROM q WHERE [text] = @text)
   `)
 
   sql.transaction(() => {
@@ -105,16 +105,15 @@ async function main() {
             }
           })
 
-          console.log(text)
+          // console.log(text)
 
           const d = description
             .map((s) => s.trim())
             .filter((s) => s)
             .join('\n')
 
-          console.log(d)
-
-          console.log('\n')
+          // console.log(d)
+          // console.log('\n')
 
           stmtRow.run({
             text,

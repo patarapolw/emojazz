@@ -39,7 +39,7 @@ body {
   font-family: 'emoji';
 }
 
-.hidden-scroll {
+.hide-scrollbar {
   overflow: scroll;
   scrollbar-width: 0;
 
@@ -95,8 +95,28 @@ body {
       }
     }
   }
-}
 
-.link {
-  color: #fff;
+  .container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-height: 100%;
+    overflow: auto;
+
+    .emoji {
+      cursor: pointer;
+      font-size: 2em;
+      line-height: 2em;
+      width: 20%;
+    }
+
+    .nothing {
+      padding: 0.5em;
+      padding-top: 1em;
+
+      width: 100%;
+      margin: 0 auto;
+    }
+  }
 }
