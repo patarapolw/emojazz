@@ -102,10 +102,11 @@ body {
     height: 100%;
     width: 100%;
     z-index: 10;
-    background-color: rgba(128, 128, 128, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
+
+    background-color: rgba(128, 128, 128, 0.5);
 
     .modal {
       position: relative;

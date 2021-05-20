@@ -17,12 +17,12 @@ declare const __LoadImage__: string
 
 window.goLoadSearch =
   window.goLoadSearch ||
-  (() => ({
+  (async () => ({
     result: __LoadSearch__,
   }))
 window.goLoadImage =
   window.goLoadImage ||
-  (() => ({
+  (async () => ({
     result: __LoadImage__,
   }))
 

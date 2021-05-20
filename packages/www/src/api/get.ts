@@ -4,7 +4,8 @@ import S from 'jsonschema-definer'
 import { getSearchObject, sSearch } from './shared'
 
 let imageObject: Record<string, string[]>
-let imageBase = 'https://emojazz.netlify.app'
+let imageBase =
+  'https://cdn.jsdelivr.net/gh/patarapolw/emojazz/packages/nodejs/assets'
 
 export async function loadBaseURL() {
   if (typeof imageObject === 'undefined') {

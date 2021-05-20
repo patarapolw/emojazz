@@ -3,7 +3,7 @@ import { createRef } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 
 import { get, loadBaseURL } from './api/get'
-import { search } from './api/search'
+import { loadIndex, search } from './api/search'
 
 export function App() {
   const [content, setContent] = useState(
@@ -14,6 +14,9 @@ export function App() {
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
   const [count, setCount] = useState(0)
+
+  const [isReady, setReady] = useState(false)
+
   const [loading, setLoading] = useState(false)
   const [selected, setSelected] = useState('')
   const [detail, setDetail] = useState({
@@ -118,7 +121,9 @@ export function App() {
   }, [selected])
 
   useEffect(() => {
-    loadBaseURL()
+    Promise.all([loadBaseURL(), loadIndex()]).then(() => {
+      setReady(true)
+    })
 
     window.onkeydown = (ev: KeyboardEvent) => {
       if (ev.code === 'Escape') {
@@ -162,6 +167,15 @@ export function App() {
           <div class="nothing">Nothing here 🤣🤣🤣</div>
         ) : null}
       </div>
+
+      {isReady ? null : (
+        <div
+          className="modal-container"
+          style={{ backgroundColor: '#88888833' }}
+        >
+          <div className="spin"></div>
+        </div>
+      )}
 
       {selected ? (
         <div className="modal-container" onClick={() => setSelected('')}>
