@@ -86,7 +86,7 @@ jobs:
       - name: Packaging (Windows)
         if: matrix.platform == 'windows-latest'
         run: |
-          mkdir emojazz
+          mkdir emojazz-windows
           mv emojazz.exe emojazz-windows\\emojazz.exe
           curl https://github.com/webview/webview/raw/master/dll/x64/WebView2Loader.dll --output emojazz-windows\\WebView2Loader.dll
           curl https://github.com/webview/webview/raw/master/dll/x64/webview.dll --output emojazz-windows\\webview.dll
