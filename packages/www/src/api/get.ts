@@ -4,6 +4,52 @@ import S from 'jsonschema-definer'
 import { getSearchObject, sSearch } from './shared'
 
 let imageObject: Record<string, string[]>
+let imageBase = 'https://emojazz.netlify.app'
+
+export async function loadBaseURL() {
+  if (typeof imageObject === 'undefined') {
+    const r = await window.goLoadImage()
+
+    imageObject = S.object()
+      .additionalProperties(S.list(S.string()))
+      .ensure(yaml.load(r.result) as any)
+
+    imageBase = (r.base || imageBase).replace(/\/$/, '')
+
+    document.head.prepend(
+      Object.assign(document.createElement('style'), {
+        innerHTML: /* css */ `
+      @font-face {
+        font-family: 'noto';
+        src: url('${imageBase}/fonts/NotoSans-Regular.ttf');
+      }
+    
+      @font-face {
+        font-family: 'noto-sc';
+        src: url('${imageBase}/fonts/NotoSansCJKsc-Regular.otf');
+      }
+    
+      @font-face {
+        font-family: 'noto-tc';
+        src: url('${imageBase}/fonts/NotoSansCJKtc-Regular.otf');
+      }
+    
+      @font-face {
+        font-family: 'noto-jp';
+        src: url('${imageBase}/fonts/NotoSansCJKjp-Regular.otf');
+      }
+    
+      @font-face {
+        font-family: 'Noto Color Emoji';
+        src: url('${imageBase}/fonts/NotoColorEmoji.ttf');
+      }
+      `,
+      }),
+    )
+  }
+
+  return imageBase
+}
 
 export async function get(inp: { id: string }): Promise<
   | (typeof sSearch.type & {
@@ -14,20 +60,14 @@ export async function get(inp: { id: string }): Promise<
   const searchObject = await getSearchObject()
   const out = searchObject[inp.id]
 
-  console.log(searchObject, inp)
-
   if (!out) {
     return null
   }
 
-  imageObject =
-    imageObject ||
-    S.object()
-      .additionalProperties(S.list(S.string()))
-      .ensure(yaml.load(await window.goLoadImage()) as any)
+  await loadBaseURL()
 
   return {
     ...out,
-    images: imageObject[inp.id] || [],
+    images: imageObject[inp.id].map((im) => imageBase + im) || [],
   }
 }

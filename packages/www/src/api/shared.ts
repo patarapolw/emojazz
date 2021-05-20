@@ -3,15 +3,28 @@ import S from 'jsonschema-definer'
 
 declare global {
   interface Window {
-    goLoadSearch: () => Promise<string>
-    goLoadImage: () => Promise<string>
+    goLoadSearch: () => Promise<{
+      result: string
+    }>
+    goLoadImage: () => Promise<{
+      result: string
+      base?: string
+    }>
   }
 }
 declare const __LoadSearch__: string
 declare const __LoadImage__: string
 
-window.goLoadSearch = window.goLoadSearch || (() => __LoadSearch__)
-window.goLoadImage = window.goLoadImage || (() => __LoadImage__)
+window.goLoadSearch =
+  window.goLoadSearch ||
+  (() => ({
+    result: __LoadSearch__,
+  }))
+window.goLoadImage =
+  window.goLoadImage ||
+  (() => ({
+    result: __LoadImage__,
+  }))
 
 export const tSearch = {
   unicode: S.list(S.string()),
@@ -29,6 +42,8 @@ export async function getSearchObject(): Promise<typeof searchObject> {
     searchObject ||
     S.object()
       .additionalProperties(sSearch)
-      .ensure(yaml.load(await window.goLoadSearch()) as any)
+      .ensure(
+        yaml.load(await window.goLoadSearch().then((r) => r.result)) as any,
+      )
   return searchObject
 }

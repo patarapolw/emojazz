@@ -26,6 +26,12 @@ export default defineConfig({
   ],
   server: {
     port: 7466,
+    proxy: {
+      /**
+       * Prevent copying of large files
+       */
+      '^/(img|font)/': 'http://localhost:5000',
+    },
   },
   build: {
     outDir: isDesktop ? '../desktop/public' : './dist',

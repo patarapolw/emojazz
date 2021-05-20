@@ -2,7 +2,7 @@ import yaml from 'js-yaml'
 import { createRef } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 
-import { get } from './api/get'
+import { get, loadBaseURL } from './api/get'
 import { search } from './api/search'
 
 export function App() {
@@ -118,6 +118,8 @@ export function App() {
   }, [selected])
 
   useEffect(() => {
+    loadBaseURL()
+
     window.onkeydown = (ev: KeyboardEvent) => {
       if (ev.code === 'Escape') {
         setSelected('')
