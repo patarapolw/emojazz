@@ -6,13 +6,18 @@ export function App() {
   const [content, setContent] = useState(
     [] as {
       text: string
-      description: string
     }[],
   )
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
   const [count, setCount] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [selected, setSelected] = useState('')
+  const [detail, setDetail] = useState({
+    images: [] as string[],
+  })
+  const [font, setFont] = useState('Noto Color Emoji')
+  const [f1, setF1] = useState(font)
 
   const rContainer = createRef<HTMLDivElement>()
 
@@ -38,7 +43,9 @@ export function App() {
       }
 
       const r1 = await fetch(
-        `/api/q?q=${q.trimStart()}&page=${page}&limit=${limit}`,
+        `/api/q?q=${encodeURIComponent(
+          q.trimStart(),
+        )}&page=${page}&limit=${limit}`,
       )
       if (!r1.ok) {
         setPage(1)
@@ -90,9 +97,36 @@ export function App() {
     }
   }, [page, content])
 
+  useEffect(() => {
+    if (!selected) {
+      return
+    }
+
+    fetch(`api/?id=${encodeURIComponent(selected)}`)
+      .then((r) =>
+        r.ok
+          ? r.json()
+          : {
+              images: [],
+            },
+      )
+      .then((r) => {
+        setDetail(r)
+      })
+  }, [selected])
+
+  useEffect(() => {
+    window.onkeydown = (ev: KeyboardEvent) => {
+      if (ev.code === 'Escape') {
+        setSelected('')
+      }
+    }
+  })
+
   return (
     <>
       <form
+        className="search"
         onSubmit={async (e) => {
           e.preventDefault()
         }}
@@ -112,15 +146,11 @@ export function App() {
             content.map(({ text, ...c }) => (
               <div
                 className="emoji"
-                title={yaml.dump(c, {
-                  replacer: (_, v) => {
-                    if (!String(v)) {
-                      return undefined
-                    }
-                    return v
-                  },
-                  skipInvalid: true,
-                })}
+                title={cleanDump(c)}
+                onClick={() => {
+                  setF1(font)
+                  setSelected(text)
+                }}
               >
                 {text}
               </div>
@@ -130,6 +160,75 @@ export function App() {
           ) : null}
         </div>
       </div>
+
+      {selected ? (
+        <div className="modal-container" onClick={() => setSelected('')}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="delete"
+              type="button"
+              onClick={() => setSelected('')}
+            >
+              <div className="emoji">✕</div>
+            </button>
+
+            <div className="row" style={{ alignItems: 'center' }}>
+              <span style={{ fontSize: '1.3em' }}>Text:</span>
+              <span className="entry" style={{ fontFamily: font }}>
+                {selected}
+              </span>
+            </div>
+
+            <div className="row">
+              {detail.images.map((im) => (
+                <div className="entry" title="Right click to copy the image">
+                  <img src={im} alt={im} />
+                </div>
+              ))}
+            </div>
+
+            <form
+              className="row font"
+              onSubmit={async (e) => {
+                e.preventDefault()
+                setFont(f1)
+              }}
+              style={{ alignItems: 'center' }}
+            >
+              <label for="font" style={{ fontSize: '1.3em' }}>
+                Font:
+              </label>
+              <input
+                type="text"
+                name="font"
+                id="font"
+                value={f1}
+                onInput={(e) => setF1((e.target as HTMLInputElement).value)}
+                placeholder="Set alternate font here"
+              />
+              <div style={{ position: 'relative' }}>
+                <button type="submit">✅</button>
+              </div>
+            </form>
+
+            <pre className="row" style={{ textAlign: 'left' }}>
+              {(({ images, ...d }) => cleanDump(d))(detail)}
+            </pre>
+          </div>
+        </div>
+      ) : null}
     </>
   )
+}
+
+function cleanDump(c: any) {
+  return yaml.dump(c, {
+    replacer: (_, v) => {
+      if (!String(v)) {
+        return undefined
+      }
+      return v
+    },
+    skipInvalid: true,
+  })
 }

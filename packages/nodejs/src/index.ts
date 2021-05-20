@@ -2,12 +2,12 @@ import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 
+import lunr from 'elasticlunr'
 import fastify from 'fastify'
 import cors from 'fastify-cors'
 import fastifyStatic from 'fastify-static'
 import yaml from 'js-yaml'
 import S from 'jsonschema-definer'
-import lunr from 'lunr'
 
 import { sSearch, tSearch } from './shared'
 
@@ -49,7 +49,13 @@ async function main() {
           ) as any,
         )
 
-      let idx: lunr.Index
+      let idx: lunr.Index<{
+        text: string
+        u: string[]
+        c: string[]
+        d: string
+        t: string[]
+      }>
       if (
         fs.existsSync('assets/idx.json') &&
         fs.existsSync('assets/idx.hash') &&
@@ -64,14 +70,16 @@ async function main() {
         )
       } else {
         idx = lunr(function () {
-          this.ref('text')
-          this.field('u')
-          this.field('c')
-          this.field('d')
-          this.field('t')
+          this.setRef('text')
+          this.addField('u')
+          this.addField('c')
+          this.addField('d')
+          this.addField('t')
+
+          this.saveDocument(false)
 
           Object.entries(searchObject).map(([text, r]) => {
-            this.add({
+            this.addDoc({
               text,
               u: r.unicode,
               c: r.categories,
@@ -146,7 +154,13 @@ async function main() {
               }
             }
 
-            const rs = idx.search(/\s+$/.test(q) ? q : q + '*')
+            const rs = idx.search(/\s+$/.test(q) ? q : q + '*', {
+              fields: {
+                c: { bool: 'AND', boost: 2 },
+                d: { bool: 'AND' },
+                t: { bool: 'AND', boost: 5 },
+              },
+            })
 
             return {
               result: rs

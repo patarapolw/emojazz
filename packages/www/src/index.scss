@@ -19,7 +19,7 @@
 }
 
 @font-face {
-  font-family: 'emoji';
+  font-family: 'Noto Color Emoji';
   src: url('/src/assets/NotoColorEmoji.ttf');
 }
 
@@ -32,11 +32,12 @@ body {
 
 * {
   font-size: 16px;
-  font-family: 'noto', 'noto-jp', 'noto-sc', 'noto-tc', 'Noto Sans', sans-serif;
+  font-family: 'noto', 'noto-jp', 'noto-sc', 'noto-tc', 'Noto Sans', sans-serif,
+    'Noto Color Emoji';
 }
 
 .emoji {
-  font-family: 'emoji';
+  font-family: 'Noto Color Emoji';
 }
 
 .hide-scrollbar {
@@ -50,6 +51,7 @@ body {
 
 #app {
   margin: 0 auto;
+  position: relative;
 
   height: 650px;
   max-height: 100vh;
@@ -65,17 +67,10 @@ body {
   display: flex;
   flex-direction: column;
 
-  form {
+  form.search {
     display: flex;
     flex-direction: row;
     align-items: center;
-
-    input#q {
-      flex-grow: 1;
-      min-width: 400px;
-      margin: 0.5em;
-      padding: 0.5em;
-    }
   }
 
   .container {
@@ -123,21 +118,130 @@ body {
     }
 
     button {
-      all: unset;
-      cursor: pointer;
       font-size: 1.2em;
       width: 2em;
       height: 2em;
       border-radius: 50%;
       position: relative;
+    }
+  }
 
-      &:hover {
-        background-color: lightblue;
+  .modal-container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 10;
+    background-color: rgba(128, 128, 128, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .modal {
+      position: relative;
+
+      min-height: 60%;
+      max-height: 90%;
+      overflow: auto;
+
+      width: 80%;
+      background-color: white;
+      border-radius: 1em;
+      padding: 1em;
+
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+
+      .delete {
+        position: absolute;
+        right: 0.5em;
+        top: 0.5em;
+        background-color: rgba(211, 211, 211, 0.5);
+        border-radius: 50%;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        height: 1.5em;
+        width: 1.5em;
+
+        &:hover {
+          background-color: lightblue;
+        }
+
+        &:active {
+          top: 0.7em;
+        }
       }
 
-      &:active {
-        top: 0.2em;
+      pre.row {
+        justify-content: flex-start;
+        align-items: flex-start;
+        text-align: left;
+
+        background-color: rgba(211, 211, 211, 0.5);
+        padding: 0.5em;
+        margin: 0;
+        border-radius: 0.2em;
+
+        margin-top: 1em;
+      }
+
+      .row {
+        position: relative;
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        flex-wrap: wrap;
+        width: 100%;
+
+        .entry {
+          height: 1em;
+          width: 1em;
+          margin: 0.5em;
+          font-size: 2em;
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          * {
+            font-size: 100%;
+          }
+
+          img {
+            height: 100%;
+            width: 100%;
+          }
+        }
       }
     }
+  }
+}
+
+input {
+  flex-grow: 1;
+  margin: 0.5em;
+  padding: 0.5em;
+  border-radius: 0.2em;
+}
+
+button {
+  position: absolute;
+  all: unset;
+  cursor: pointer;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+
+  &:hover {
+    background-color: lightblue;
+  }
+
+  &:active {
+    top: 0.2em;
   }
 }
