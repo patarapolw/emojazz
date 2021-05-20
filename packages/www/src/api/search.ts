@@ -17,6 +17,7 @@ export const idxOpts: Options<{
       c: 2,
     },
     prefix: true,
+    // prefix: (_, i, terms) => i === terms.length - 1,
     combineWith: 'AND',
   },
 }
