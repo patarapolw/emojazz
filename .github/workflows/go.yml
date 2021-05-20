@@ -49,13 +49,15 @@ jobs:
       - name: Packaging (Linux)
         if: matrix.platform == 'ubuntu-latest'
         run: |
-          mv emojazz emojazz-linux
+          mkdir emojazz-linux
+          mv emojazz emojazz-linux/emojazz
+          tar -czf emojazz-linux.tar.gz emojazz-linux
       - name: Upload binaries to release (Linux)
         if: matrix.platform == 'ubuntu-latest'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: emojazz-linux
+          file: emojazz-linux.tar.gz
           tag: release-${{ github.ref }}
           overwrite: true
           body: Executable for Linux
@@ -85,7 +87,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           mkdir emojazz
-          mv emojazz emojazz-windows\\emojazz.exe
+          mv emojazz.exe emojazz-windows\\emojazz.exe
           curl https://github.com/webview/webview/raw/master/dll/x64/WebView2Loader.dll --output emojazz-windows\\WebView2Loader.dll
           curl https://github.com/webview/webview/raw/master/dll/x64/webview.dll --output emojazz-windows\\webview.dll
           tar -cvf emojazz-windows.tar emojazz-windows
