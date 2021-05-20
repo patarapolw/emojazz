@@ -5,11 +5,11 @@ import path from 'path'
 import fastify from 'fastify'
 import cors from 'fastify-cors'
 import fastifyStatic from 'fastify-static'
-import FlexSearch from 'flexsearch'
 import yaml from 'js-yaml'
 import S from 'jsonschema-definer'
+import MiniSearch from 'minisearch'
 
-import { sSearch, tSearch } from './shared'
+import { idxOpts, sSearch, tSearch } from './shared'
 
 async function main() {
   const app = fastify({
@@ -49,19 +49,13 @@ async function main() {
           ) as any,
         )
 
-      const idx = FlexSearch.create<{
-        text: string
+      let idx: MiniSearch<{
+        id: string
         u: string[]
         c: string[]
         d: string
         t: string[]
-      }>({
-        depth: 3,
-        doc: {
-          id: 'text',
-          field: ['u', 'c', 'd', 't'],
-        },
-      })
+      }>
 
       if (
         fs.existsSync('assets/idx.json') &&
@@ -72,17 +66,23 @@ async function main() {
           .digest()
           .toString('base64') === fs.readFileSync('assets/idx.hash', 'utf-8')
       ) {
-        idx.import(fs.readFileSync('assets/idx.json', 'utf-8'))
+        idx = MiniSearch.loadJSON(
+          fs.readFileSync('assets/idx.json', 'utf-8'),
+          idxOpts,
+        )
       } else {
-        Object.entries(searchObject).map(([text, r]) => {
-          idx.add({
-            text,
-            u: r.unicode,
-            c: r.categories,
-            d: Object.values(r.description).join('\n'),
-            t: r.tag,
-          })
-        })
+        idx = new MiniSearch(idxOpts)
+        await idx.addAllAsync(
+          Object.entries(searchObject).map(([text, r]) => {
+            return {
+              id: text,
+              u: r.unicode,
+              c: r.categories,
+              d: Object.values(r.description).join('\n'),
+              t: r.tag,
+            }
+          }),
+        )
 
         fs.writeFileSync('assets/idx.json', JSON.stringify(idx))
         fs.writeFileSync(
@@ -149,12 +149,12 @@ async function main() {
               }
             }
 
-            const rs = await idx.search(q)
+            const rs = idx.search(q)
 
             return {
               result: rs
                 .map((r) => ({
-                  text: r.text,
+                  text: r.id,
                   ...searchObject[r.text],
                 }))
                 .slice((page - 1) * limit, page * limit),

@@ -2,6 +2,9 @@ import yaml from 'js-yaml'
 import { createRef } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 
+import { get } from './api/get'
+import { search } from './api/search'
+
 export function App() {
   const [content, setContent] = useState(
     [] as {
@@ -42,25 +45,26 @@ export function App() {
         setContent([])
       }
 
-      const r1 = await fetch(
-        `/api/q?q=${encodeURIComponent(
-          q.trimStart(),
-        )}&page=${page}&limit=${limit}`,
-      )
-      if (!r1.ok) {
+      const r = await search({
+        q,
+        page,
+        limit,
+      })
+
+      console.log(r)
+
+      if (!r.count) {
         setPage(1)
         setContent([])
       }
 
-      const r2 = await r1.json()
-
-      const c = [...(opts.prev || []), ...r2.result]
+      const c = [...(opts.prev || []), ...r.result]
       setContent(c)
-      setCount(r2.count)
+      setCount(r.count)
 
       if (opts.prev) {
         const prevSet = new Set(opts.prev)
-        const dupl = r2.result.filter((r: string) => prevSet.has(r))
+        const dupl = r.result.filter((r0) => prevSet.has(r0.text))
         if (dupl.length) {
           console.error('Duplicates: ', dupl)
         }
@@ -102,17 +106,15 @@ export function App() {
       return
     }
 
-    fetch(`api/?id=${encodeURIComponent(selected)}`)
-      .then((r) =>
-        r.ok
-          ? r.json()
-          : {
-              images: [],
-            },
+    get({
+      id: selected,
+    }).then((r) => {
+      setDetail(
+        r || {
+          images: [],
+        },
       )
-      .then((r) => {
-        setDetail(r)
-      })
+    })
   }, [selected])
 
   useEffect(() => {
@@ -140,25 +142,23 @@ export function App() {
         />
       </form>
 
-      <div className="container">
-        <div ref={rContainer}>
-          {content.length ? (
-            content.map(({ text, ...c }) => (
-              <div
-                className="emoji"
-                title={cleanDump(c)}
-                onClick={() => {
-                  setF1(font)
-                  setSelected(text)
-                }}
-              >
-                {text}
-              </div>
-            ))
-          ) : page === 1 ? (
-            <div class="nothing">Nothing here 🤣🤣🤣</div>
-          ) : null}
-        </div>
+      <div className="container" ref={rContainer}>
+        {content.length ? (
+          content.map(({ text, ...c }) => (
+            <div
+              className="emoji"
+              title={cleanDump(c)}
+              onClick={() => {
+                setF1(font)
+                setSelected(text)
+              }}
+            >
+              {text}
+            </div>
+          ))
+        ) : page === 1 ? (
+          <div class="nothing">Nothing here 🤣🤣🤣</div>
+        ) : null}
       </div>
 
       {selected ? (
