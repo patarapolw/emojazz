@@ -2,10 +2,10 @@ import crypto from 'crypto'
 import fs from 'fs'
 import path from 'path'
 
-import lunr from 'elasticlunr'
 import fastify from 'fastify'
 import cors from 'fastify-cors'
 import fastifyStatic from 'fastify-static'
+import FlexSearch from 'flexsearch'
 import yaml from 'js-yaml'
 import S from 'jsonschema-definer'
 
@@ -49,13 +49,20 @@ async function main() {
           ) as any,
         )
 
-      let idx: lunr.Index<{
+      const idx = FlexSearch.create<{
         text: string
         u: string[]
         c: string[]
         d: string
         t: string[]
-      }>
+      }>({
+        depth: 3,
+        doc: {
+          id: 'text',
+          field: ['u', 'c', 'd', 't'],
+        },
+      })
+
       if (
         fs.existsSync('assets/idx.json') &&
         fs.existsSync('assets/idx.hash') &&
@@ -65,27 +72,15 @@ async function main() {
           .digest()
           .toString('base64') === fs.readFileSync('assets/idx.hash', 'utf-8')
       ) {
-        idx = lunr.Index.load(
-          JSON.parse(fs.readFileSync('assets/idx.json', 'utf-8')),
-        )
+        idx.import(fs.readFileSync('assets/idx.json', 'utf-8'))
       } else {
-        idx = lunr(function () {
-          this.setRef('text')
-          this.addField('u')
-          this.addField('c')
-          this.addField('d')
-          this.addField('t')
-
-          this.saveDocument(false)
-
-          Object.entries(searchObject).map(([text, r]) => {
-            this.addDoc({
-              text,
-              u: r.unicode,
-              c: r.categories,
-              d: Object.values(r.description).join('\n'),
-              t: r.tag,
-            })
+        Object.entries(searchObject).map(([text, r]) => {
+          idx.add({
+            text,
+            u: r.unicode,
+            c: r.categories,
+            d: Object.values(r.description).join('\n'),
+            t: r.tag,
           })
         })
 
@@ -154,19 +149,13 @@ async function main() {
               }
             }
 
-            const rs = idx.search(/\s+$/.test(q) ? q : q + '*', {
-              fields: {
-                c: { bool: 'AND', boost: 2 },
-                d: { bool: 'AND' },
-                t: { bool: 'AND', boost: 5 },
-              },
-            })
+            const rs = await idx.search(q)
 
             return {
               result: rs
                 .map((r) => ({
-                  text: r.ref,
-                  ...searchObject[r.ref],
+                  text: r.text,
+                  ...searchObject[r.text],
                 }))
                 .slice((page - 1) * limit, page * limit),
               count: rs.length,
