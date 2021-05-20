@@ -1,3 +1,6 @@
+import yaml from 'js-yaml'
+import S from 'jsonschema-definer'
+
 import { getSearchObject, sSearch } from './shared'
 
 let imageObject: Record<string, string[]>
@@ -19,7 +22,9 @@ export async function get(inp: { id: string }): Promise<
 
   imageObject =
     imageObject ||
-    (await import('../generated/image.json').then((r) => r.default))
+    S.object()
+      .additionalProperties(S.list(S.string()))
+      .ensure(yaml.load(await window.goLoadImage()) as any)
 
   return {
     ...out,

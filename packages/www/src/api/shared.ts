@@ -1,4 +1,17 @@
+import yaml from 'js-yaml'
 import S from 'jsonschema-definer'
+
+declare global {
+  interface Window {
+    goLoadSearch: () => Promise<string>
+    goLoadImage: () => Promise<string>
+  }
+}
+declare const __LoadSearch__: string
+declare const __LoadImage__: string
+
+window.goLoadSearch = window.goLoadSearch || (() => __LoadSearch__)
+window.goLoadImage = window.goLoadImage || (() => __LoadImage__)
 
 export const tSearch = {
   unicode: S.list(S.string()),
@@ -14,6 +27,8 @@ let searchObject: Record<string, typeof sSearch.type>
 export async function getSearchObject(): Promise<typeof searchObject> {
   searchObject =
     searchObject ||
-    (await import('../generated/search.json').then((r) => r.default))
+    S.object()
+      .additionalProperties(sSearch)
+      .ensure(yaml.load(await window.goLoadSearch()) as any)
   return searchObject
 }

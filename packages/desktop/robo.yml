@@ -1,0 +1,4 @@
+install:
+  command: |
+    cp -r ../www/dist public
+    cp ../nodejs/assets/*.yaml .

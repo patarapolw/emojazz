@@ -48,13 +48,22 @@ export async function search(inp: {
     }
   }
 
-  idx =
-    idx ||
-    MiniSearch.loadJSON(
-      JSON.stringify(await import('../generated/idx.json')),
-      idxOpts,
-    )
   const searchObject = await getSearchObject()
+
+  if (typeof idx === 'undefined') {
+    idx = new MiniSearch(idxOpts)
+    await idx.addAllAsync(
+      Object.entries(searchObject).map(([text, r]) => {
+        return {
+          id: text,
+          u: r.unicode,
+          c: r.categories,
+          d: Object.values(r.description).join('\n'),
+          t: r.tag,
+        }
+      }),
+    )
+  }
 
   const { page = 1, limit = 50 } = inp
   const rs = idx.search(q)
