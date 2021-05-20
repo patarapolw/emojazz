@@ -7,7 +7,7 @@
     "build": "tsc && vite build",
     "serve": "vite preview",
     "desktop": "export IS_DESKTOP=1 && yarn build",
-    "deploy": "yarn build && cp -r ../nodejs/assets/fonts dist/  && cp -r ../nodejs/assets/img dist/ && netlify deploy"
+    "deploy": "export BASE_URL=https://emojazz.netlify.app && yarn build && cp -r ../nodejs/assets/fonts dist/  && cp -r ../nodejs/assets/img dist/ && netlify deploy"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",

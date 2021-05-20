@@ -6,3 +6,7 @@ Jazzy emoji / kaomoji picker
 - Includes Kaomoji
 - Works offline / completely free
 - Accepts contribution / allows to fork
+
+## Demo
+
+See <https://emojazz.netlify.app>.

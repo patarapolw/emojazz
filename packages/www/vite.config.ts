@@ -20,6 +20,7 @@ export default defineConfig({
           ? ''
           : fs.readFileSync('../nodejs/assets/image.yaml', 'utf-8'),
       ),
+      __BaseURL__: JSON.stringify(process.env.BASE_URL || ''),
       preventAssignment: true,
     }),
     preact(),

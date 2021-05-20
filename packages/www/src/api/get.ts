@@ -6,6 +6,7 @@ import { getSearchObject, sSearch } from './shared'
 let imageObject: Record<string, string[]>
 let imageBase =
   'https://cdn.jsdelivr.net/gh/patarapolw/emojazz/packages/nodejs/assets'
+declare const __BaseURL__: string
 
 export async function loadBaseURL() {
   if (typeof imageObject === 'undefined') {
@@ -15,7 +16,7 @@ export async function loadBaseURL() {
       .additionalProperties(S.list(S.string()))
       .ensure(yaml.load(r.result) as any)
 
-    imageBase = (r.base || imageBase).replace(/\/$/, '')
+    imageBase = (r.base || __BaseURL__ || imageBase).replace(/\/$/, '')
 
     document.head.prepend(
       Object.assign(document.createElement('style'), {
