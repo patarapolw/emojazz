@@ -1,0 +1,32 @@
+{
+  "applicationId": "cc.polv.emojazz",
+  "port": 0,
+  "defaultMode": "window",
+  "enableHTTPServer": true,
+  "enableNativeAPI": true,
+  "url": "/public/",
+  "nativeBlockList": [],
+  "globalVariables": {
+    "BASE_URL": "https://cdn.jsdelivr.net/gh/patarapolw/emojazz/packages/nodejs/assets"
+  },
+  "modes": {
+    "window": {
+      "title": "Emojazz emoji / kaomoji picker",
+      "width": 500,
+      "height": 800,
+      "fullScreen": false,
+      "alwaysOnTop": false,
+      "icon": "/public/neu/appIcon.png",
+      "enableInspector": false,
+      "borderless": false,
+      "maximize": false
+    },
+    "browser": {},
+    "cloud": {}
+  },
+  "cli": {
+    "binaryName": "emojazz",
+    "resourcesPath": "/public/",
+    "clientLibrary": "/public/neu/neutralino.js"
+  }
+}
