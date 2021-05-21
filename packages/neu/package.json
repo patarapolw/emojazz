@@ -6,7 +6,9 @@
   "scripts": {
     "start": "neu run",
     "dev": "snowpack dev",
-    "build": "snowpack build"
+    "build": "snowpack build",
+    "prerelease": "yarn build",
+    "release": "rm -rf dist && neu build && cp -r assets dist/emojazz/assets && neu build --release"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
