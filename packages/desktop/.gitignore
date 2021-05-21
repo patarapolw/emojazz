@@ -1,0 +1,10 @@
+/emojazz
+/emojazz.*
+#/public/
+/*.yaml
+/*.zip
+/*.tar
+/*.tar.*
+/dist/
+
+!/config.yaml

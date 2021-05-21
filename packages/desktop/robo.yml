@@ -1,0 +1,35 @@
+install:
+  command: |
+    # cp -r ../www/dist public
+    cp ../nodejs/assets/*.yaml .
+start:
+  command: |
+    go build -o emojazz .
+    ./emojazz
+dist:
+  command: |
+    rm -rf dist
+
+    mkdir -p dist/linux_unpacked
+    GOOS=linux go build -o dist/linux_unpacked/emojazz .
+    cp *.yaml dist/linux_unpacked/
+    cp -r public dist/linux_unpacked/public
+    cd dist/linux_unpacked
+    tar -czf ../emojazz-linux.tar.gz *
+    cd -
+
+    mkdir -p dist/windows_unpacked
+    GOOS=windows go build -ldflags="-H windowsgui" -o dist/windows_unpacked/emojazz.exe .
+    cp *.yaml dist/windows_unpacked/
+    cp -r public dist/windows_unpacked/public
+    cd dist/windows_unpacked
+    zip -r ../emojazz-windows.zip *
+    cd -
+
+    mkdir -p dist/mac_unpacked
+    GOOS=darwin go build -o dist/mac_unpacked/emojazz.app .
+    cp *.yaml dist/mac_unpacked/
+    cp -r public dist/mac_unpacked/public
+    cd dist/mac_unpacked
+    zip -r ../emojazz-mac.zip *
+    cd -

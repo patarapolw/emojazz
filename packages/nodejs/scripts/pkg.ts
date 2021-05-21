@@ -17,14 +17,14 @@ export async function makeWindows() {
     })
   })
 
-  zip.addLocalFile(`../neu/${NAME}-win.exe`, `${NAME}.exe`)
+  zip.addLocalFile(`../neu/${NAME}-win.exe`, '', `${NAME}.exe`)
 
   zip.addLocalFolder('../neu/assets', 'assets')
   zip.addLocalFolder('../neu/public', 'public')
 
-  zip.addLocalFile('../neu/neutralino.config.json', 'neutralino.config.json')
-  zip.addLocalFile('../../LICENSE', 'LICENSE')
-  zip.addLocalFile('../../README.md', 'README.md')
+  zip.addLocalFile('../neu/neutralino.config.json')
+  zip.addLocalFile('../../LICENSE')
+  zip.addLocalFile('../../README.md')
 
   fs.ensureFileSync(`../neu/dist/${NAME}-win.zip`)
   fs.unlinkSync(`../neu/dist/${NAME}-win.zip`)
@@ -34,14 +34,14 @@ export async function makeWindows() {
 export async function makeLinux() {
   const zip = new AdmZip()
 
-  zip.addLocalFile(`../neu/${NAME}-linux`, NAME)
+  zip.addLocalFile(`../neu/${NAME}-linux`, '', NAME)
 
   zip.addLocalFolder('../neu/assets', 'assets')
   zip.addLocalFolder('../neu/public', 'public')
 
-  zip.addLocalFile('../neu/neutralino.config.json', 'neutralino.config.json')
-  zip.addLocalFile('../../LICENSE', 'LICENSE')
-  zip.addLocalFile('../../README.md', 'README.md')
+  zip.addLocalFile('../neu/neutralino.config.json')
+  zip.addLocalFile('../../LICENSE')
+  zip.addLocalFile('../../README.md')
 
   zip.addFile(
     `${NAME}.desktop`,
@@ -129,6 +129,16 @@ function trimIndent(s: string): string {
 }
 
 if (require.main === module) {
+  execSync(
+    `
+  yarn build
+  `,
+    {
+      cwd: '../neu',
+      stdio: 'inherit',
+    },
+  )
+
   makeWindows()
   makeLinux()
   makeMac()

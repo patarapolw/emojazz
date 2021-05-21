@@ -10,13 +10,16 @@ declare const __BaseURL__: string
 
 export async function loadBaseURL() {
   if (typeof imageObject === 'undefined') {
-    const r = await window.goLoadImage()
-
     imageObject = S.object()
       .additionalProperties(S.list(S.string()))
-      .ensure(yaml.load(r.result) as any)
+      .ensure(yaml.load(await window.goLoadImage()) as any)
 
-    imageBase = (r.base || __BaseURL__ || imageBase).replace(/\/$/, '')
+    const config = await window.goLoadConfig()
+    imageBase = (
+      (config.trim()
+        ? (yaml.load(config) as Record<string, any>).assetURL
+        : __BaseURL__) || imageBase
+    ).replace(/\/$/, '')
 
     document.head.prepend(
       Object.assign(document.createElement('style'), {
