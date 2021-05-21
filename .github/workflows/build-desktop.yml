@@ -95,7 +95,8 @@ jobs:
           mv emojazz.exe dist\\emojazz.exe
           curl https://raw.githubusercontent.com/webview/webview/master/dll/x64/WebView2Loader.dll --output dist\\WebView2Loader.dll
           curl https://raw.githubusercontent.com/webview/webview/master/dll/x64/webview.dll --output dist\\webview.dll
-          mv packages\\desktop\\config.yaml packages\\nodejs\\assets\\*.yaml dist
+          mv packages\\desktop\\config.yaml dist
+          mv packages\\nodejs\\assets\\*.yaml dist
           mv packages\\desktop\\public dist\\public
           cd dist
           tar -cf ..\\emojazz-windows.tar *
