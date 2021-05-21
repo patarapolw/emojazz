@@ -78,7 +78,6 @@ func main() {
 		ui, _ := lorca.New("data:text/html,"+url.PathEscape(fmt.Sprintf(`
 		<html>
 			<head><title>%s</title></head>
-			<body><h1>Hello, world!</h1></body>
 		</html>
 		`, t.Title)), "", t.Width, t.Height)
 		defer ui.Close()
