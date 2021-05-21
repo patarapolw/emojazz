@@ -7,7 +7,7 @@
   "url": "/public/",
   "nativeBlockList": [],
   "globalVariables": {
-    "TEST": "Test Value"
+    "BASE_URL": "https://cdn.jsdelivr.net/gh/patarapolw/emojazz/packages/nodejs/assets"
   },
   "modes": {
     "window": {

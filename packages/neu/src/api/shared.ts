@@ -20,16 +20,40 @@ declare global {
   }
 }
 
-window.goLoadSearch =
-  window.goLoadSearch ||
-  (async () => ({
+window.goLoadSearch = async () => {
+  if (window.Neutralino) {
+    return window.Neutralino.filesystem
+      .readFile({
+        filename: [window.NL_PATH, 'assets', 'search.yaml'].join(
+          window.NL_OS === 'Windows' ? '\\' : '/',
+        ),
+      })
+      .then((r) => ({
+        result: r.data,
+      }))
+  }
+
+  return {
     result: import.meta.env.__LoadSearch__,
-  }))
-window.goLoadImage =
-  window.goLoadImage ||
-  (async () => ({
+  }
+}
+window.goLoadImage = async () => {
+  if (window.Neutralino) {
+    return window.Neutralino.filesystem
+      .readFile({
+        filename: [window.NL_PATH, 'assets', 'image.yaml'].join(
+          window.NL_OS === 'Windows' ? '\\' : '/',
+        ),
+      })
+      .then((r) => ({
+        result: r.data,
+      }))
+  }
+
+  return {
     result: import.meta.env.__LoadImage__,
-  }))
+  }
+}
 
 export const tSearch = {
   unicode: S.list(S.string()),

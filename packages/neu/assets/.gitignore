@@ -1,0 +1,5 @@
+**
+!.gitignore
+!README.md
+
+## Assets are copied from packages/nodejs/assets/*.yaml
