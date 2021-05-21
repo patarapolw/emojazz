@@ -1,8 +1,0 @@
-install:
-  command: |
-    cp -r ../www/dist public
-    cp ../nodejs/assets/*.yaml .
-start:
-  command: |
-    go build -o emojazz .
-    ./emojazz

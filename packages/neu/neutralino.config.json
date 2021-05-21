@@ -1,0 +1,32 @@
+{
+  "applicationId": "js.neutralino.sample",
+  "port": 0,
+  "defaultMode": "window",
+  "enableHTTPServer": true,
+  "enableNativeAPI": true,
+  "url": "/public/",
+  "nativeBlockList": [],
+  "globalVariables": {
+    "TEST": "Test Value"
+  },
+  "modes": {
+    "window": {
+      "title": "Emojazz emoji / kaomoji picker",
+      "width": 500,
+      "height": 800,
+      "fullScreen": false,
+      "alwaysOnTop": false,
+      "icon": "/public/neu/appIcon.png",
+      "enableInspector": true,
+      "borderless": false,
+      "maximize": false
+    },
+    "browser": {},
+    "cloud": {}
+  },
+  "cli": {
+    "binaryName": "emojazz",
+    "resourcesPath": "/public/",
+    "clientLibrary": "/public/neu/neutralino.js"
+  }
+}

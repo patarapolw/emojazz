@@ -1,9 +1,0 @@
-/emojazz
-/emojazz.*
-/public/
-/*.yaml
-/*.zip
-/*.tar
-/*.tar.*
-
-!/config.yaml
