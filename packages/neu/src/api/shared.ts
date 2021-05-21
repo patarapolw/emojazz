@@ -10,6 +10,19 @@ declare global {
       result: string
       base?: string
     }>
+
+    NL_PATH: string
+    NL_CWD: string
+    NL_OS: 'Windows' | 'Linux' | 'macOS'
+    NL_BASE_URL: string
+
+    Neutralino: {
+      filesystem: {
+        readFile(inp: { fileName: string }): Promise<{
+          data: string
+        }>
+      }
+    }
   }
   interface ImportMeta {
     env: {
@@ -21,10 +34,15 @@ declare global {
 }
 
 window.goLoadSearch = async () => {
-  if (window.Neutralino) {
+  if (window.NL_OS) {
+    if (!window.Neutralino) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      return window.goLoadSearch()
+    }
+
     return window.Neutralino.filesystem
       .readFile({
-        filename: [window.NL_PATH, 'assets', 'search.yaml'].join(
+        fileName: [window.NL_PATH, 'assets', 'search.yaml'].join(
           window.NL_OS === 'Windows' ? '\\' : '/',
         ),
       })
@@ -38,10 +56,15 @@ window.goLoadSearch = async () => {
   }
 }
 window.goLoadImage = async () => {
-  if (window.Neutralino) {
+  if (window.NL_OS) {
+    if (!window.Neutralino) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+      return window.goLoadImage()
+    }
+
     return window.Neutralino.filesystem
       .readFile({
-        filename: [window.NL_PATH, 'assets', 'image.yaml'].join(
+        fileName: [window.NL_PATH, 'assets', 'image.yaml'].join(
           window.NL_OS === 'Windows' ? '\\' : '/',
         ),
       })
