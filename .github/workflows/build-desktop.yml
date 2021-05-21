@@ -1,0 +1,111 @@
+name: build-desktop
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+
+      ############ Set Up ############
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.15
+
+      - name: install webkit2gtk (Ubuntu)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y webkit2gtk-4.0
+
+      ############ Build ############
+
+      - name: Build (non-Windows)
+        if: matrix.platform != 'windows-latest'
+        run: |
+          cd packages/desktop
+          go build -o ../../emojazz
+
+      - name: Build (Windows)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          cd packages\\desktop
+          go build -ldflags="-H windowsgui" -o ..\\..\\emojazz.exe
+
+      ############ Packaging (Linux) ############
+
+      - name: Packaging (Linux)
+        if: matrix.platform == 'ubuntu-latest'
+        run: |
+          mkdir dist
+          mv emojazz dist/emojazz
+          mv packages/desktop/config.yaml packages/nodejs/assets/*.yaml dist/
+          mv packages/desktop/public dist/public
+          cd dist
+          tar -czf ../emojazz-linux.tar.gz *
+      - name: Upload binaries to release (Linux)
+        if: matrix.platform == 'ubuntu-latest'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: emojazz-linux.tar.gz
+          tag: release-${{ github.ref }}
+          overwrite: true
+          body: Executable for Linux
+
+      ############ Packaging (macOS) ############
+
+      - name: Packaging (macOS)
+        if: matrix.platform == 'macos-latest'
+        run: |
+          mkdir dist
+          mv emojazz dist/emojazz.app
+          mv packages/desktop/config.yaml packages/nodejs/assets/*.yaml dist/
+          mv packages/desktop/public dist/public
+          cd dist
+          zip -r ../emojazz-macos.zip *
+      - name: Upload binaries to release (macOS)
+        if: matrix.platform == 'macos-latest'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: emojazz-macos.zip
+          tag: release-${{ github.ref }}
+          overwrite: true
+          body: Executable for macOS
+
+      ############ Packaging (Windows) ############
+
+      - name: Packaging (Windows)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          mkdir dist
+          mv emojazz.exe dist\\emojazz.exe
+          curl https://raw.githubusercontent.com/webview/webview/master/dll/x64/WebView2Loader.dll --output dist\\WebView2Loader.dll
+          curl https://raw.githubusercontent.com/webview/webview/master/dll/x64/webview.dll --output dist\\webview.dll
+          mv packages\\desktop\\config.yaml dist
+          mv packages\\nodejs\\assets\\*.yaml dist
+          mv packages\\desktop\\public dist\\public
+          cd dist
+          tar -cf ..\\emojazz-windows.tar *
+      - name: Upload binaries to release (Windows)
+        if: matrix.platform == 'windows-latest'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: emojazz-windows.tar
+          tag: release-${{ github.ref }}
+          overwrite: true
+          body: Executable for Windows

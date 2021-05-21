@@ -3,28 +3,47 @@ import S from 'jsonschema-definer'
 
 declare global {
   interface Window {
-    goLoadSearch: () => Promise<{
-      result: string
-    }>
-    goLoadImage: () => Promise<{
-      result: string
-      base?: string
-    }>
+    goLoadSearch: () => Promise<string>
+    goLoadImage: () => Promise<string>
+    goLoadConfig: () => Promise<string>
   }
 }
 declare const __LoadSearch__: string
 declare const __LoadImage__: string
+declare const __LoadConfig__: string
 
-window.goLoadSearch =
-  window.goLoadSearch ||
-  (async () => ({
-    result: __LoadSearch__,
-  }))
-window.goLoadImage =
-  window.goLoadImage ||
-  (async () => ({
-    result: __LoadImage__,
-  }))
+window.goLoadSearch = async () => {
+  const r = __LoadSearch__
+  if (r) {
+    return r
+  }
+
+  return fetch('/api/search', {
+    method: 'POST',
+  }).then((r) => r.text())
+}
+
+window.goLoadImage = async () => {
+  const r = __LoadImage__
+  if (r) {
+    return r
+  }
+
+  return fetch('/api/image', {
+    method: 'POST',
+  }).then((r) => r.text())
+}
+
+window.goLoadConfig = async () => {
+  const r = __LoadConfig__
+  if (r) {
+    return r
+  }
+
+  return fetch('/api/image', {
+    method: 'POST',
+  }).then((r) => r.text())
+}
 
 export const tSearch = {
   unicode: S.list(S.string()),
@@ -42,8 +61,6 @@ export async function getSearchObject(): Promise<typeof searchObject> {
     searchObject ||
     S.object()
       .additionalProperties(sSearch)
-      .ensure(
-        yaml.load(await window.goLoadSearch().then((r) => r.result)) as any,
-      )
+      .ensure(yaml.load(await window.goLoadSearch()) as any)
   return searchObject
 }

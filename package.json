@@ -1,0 +1,14 @@
+{
+  "name": "emojazz",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:patarapolw/emojazz.git",
+  "author": "Pacharapol Withayasakpunt <polv@polv.cc>",
+  "license": "MIT",
+  "devDependencies": {
+    "husky": "^6.0.0"
+  },
+  "scripts": {
+    "prepare": "husky install"
+  }
+}

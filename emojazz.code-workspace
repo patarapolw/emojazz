@@ -1,0 +1,17 @@
+{
+  "folders": [
+    {
+      "path": "."
+    },
+    {
+      "path": "packages/desktop"
+    }
+  ],
+  "settings": {
+    "cSpell.words": [
+      "emojazz",
+      "kaomoji",
+      "neutralino"
+    ]
+  }
+}
