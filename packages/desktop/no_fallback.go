@@ -1,5 +1,4 @@
 //+build no_fallback
-//+build windows
 
 package main
 
@@ -22,7 +21,7 @@ func fallback(t cfg, url string) {
 			uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr("Please update to Microsoft Edge"))), uintptr(uint(mbYesNo|mbIconQuestion)))
 
 		if int(ret) == idYes {
-			exec.Command("c:\\windows\\servicepackfiles\\i386\\iexplore.exe").Run()
+			exec.Command("start", "iexplore", "https://www.microsoft.com/en-us/edge").Run()
 		}
 
 		return
