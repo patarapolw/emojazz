@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/webview/webview"
 	"github.com/zserge/lorca"
@@ -17,12 +18,12 @@ import (
 )
 
 type cfg struct {
-	Debug    bool
-	Title    string
-	Width    int
-	Height   int
-	port     int
-	AssetURL string
+	Debug  bool
+	Title  string
+	Width  int
+	Height int
+	port   int
+	CDN    string
 }
 
 func main() {
@@ -55,9 +56,6 @@ func main() {
 	go http.Serve(ln, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			switch r.URL.Path {
-			case "/api/config":
-				b, _ := ioutil.ReadFile(filepath.Join(dir, "config.yaml"))
-				w.Write(b)
 			case "/api/search":
 				b, _ := ioutil.ReadFile(filepath.Join(dir, "search.yaml"))
 				w.Write(b)
@@ -66,6 +64,24 @@ func main() {
 				w.Write(b)
 			}
 
+			return
+		}
+
+		if strings.HasPrefix(r.URL.Path, "/img") || strings.HasPrefix(r.URL.Path, "/fonts") {
+			p := filepath.Join(dir, strings.ReplaceAll(r.URL.Path[1:], "/", string(os.PathSeparator)))
+			_, err := os.Stat(p)
+			if err == nil {
+				http.ServeFile(w, r, p)
+				return
+			}
+
+			redirectURL := t.CDN
+			length := len(redirectURL)
+			if string(redirectURL[length-1]) == "/" {
+				redirectURL = redirectURL[:length-1]
+			}
+			redirectURL = redirectURL + r.URL.Path
+			http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
 			return
 		}
 

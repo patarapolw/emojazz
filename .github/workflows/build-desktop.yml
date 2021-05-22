@@ -50,6 +50,7 @@ jobs:
         if: matrix.platform == 'ubuntu-latest'
         run: |
           mkdir dist
+          mkdir dist/img
           mv emojazz dist/emojazz
           mv packages/desktop/config.yaml packages/nodejs/assets/*.yaml dist/
           mv packages/desktop/public dist/public
@@ -71,6 +72,7 @@ jobs:
         if: matrix.platform == 'macos-latest'
         run: |
           mkdir dist
+          mkdir dist/img
           mv emojazz dist/emojazz.app
           mv packages/desktop/config.yaml packages/nodejs/assets/*.yaml dist/
           mv packages/desktop/public dist/public
@@ -92,6 +94,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           mkdir dist
+          mkdir dist\\img
           mv emojazz.exe dist\\emojazz.exe
           curl https://raw.githubusercontent.com/webview/webview/master/dll/x64/WebView2Loader.dll --output dist\\WebView2Loader.dll
           curl https://raw.githubusercontent.com/webview/webview/master/dll/x64/webview.dll --output dist\\webview.dll

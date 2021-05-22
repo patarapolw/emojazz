@@ -1,3 +1,28 @@
+@font-face {
+  font-family: 'noto';
+  src: url('/fonts/NotoSans-Regular.ttf');
+}
+
+@font-face {
+  font-family: 'noto-sc';
+  src: url('/fonts/NotoSansCJKsc-Regular.otf');
+}
+
+@font-face {
+  font-family: 'noto-tc';
+  src: url('/fonts/NotoSansCJKtc-Regular.otf');
+}
+
+@font-face {
+  font-family: 'noto-jp';
+  src: url('/fonts/NotoSansCJKjp-Regular.otf');
+}
+
+@font-face {
+  font-family: 'Noto Color Emoji';
+  src: url('/fonts/NotoColorEmoji.ttf');
+}
+
 html,
 body {
   padding: 0;
