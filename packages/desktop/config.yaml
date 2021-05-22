@@ -3,4 +3,4 @@ title: Emojazz emoji / kaomoji picker
 width: 600
 height: 800
 # port: 0
-# assetURL: /
+cdn: https://cdn.jsdelivr.net/gh/patarapolw/emojazz/packages/nodejs/assets

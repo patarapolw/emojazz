@@ -5,12 +5,10 @@ declare global {
   interface Window {
     goLoadSearch: () => Promise<string>
     goLoadImage: () => Promise<string>
-    goLoadConfig: () => Promise<string>
   }
 }
 declare const __LoadSearch__: string
 declare const __LoadImage__: string
-declare const __LoadConfig__: string
 
 window.goLoadSearch = async () => {
   const r = __LoadSearch__
@@ -25,17 +23,6 @@ window.goLoadSearch = async () => {
 
 window.goLoadImage = async () => {
   const r = __LoadImage__
-  if (r) {
-    return r
-  }
-
-  return fetch('/api/image', {
-    method: 'POST',
-  }).then((r) => r.text())
-}
-
-window.goLoadConfig = async () => {
-  const r = __LoadConfig__
   if (r) {
     return r
   }

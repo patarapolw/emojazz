@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently 'vite' 'cd ../nodejs && yarn serve'",
     "build": "tsc && vite build",
-    "serve": "vite preview",
+    "serve": "concurrently 'vite preview' 'cd ../nodejs && yarn serve'",
     "desktop": "export IS_DESKTOP=1 && yarn build",
-    "deploy": "export BASE_URL=https://emojazz.netlify.app && yarn build && cp -r ../nodejs/assets/fonts dist/  && cp -r ../nodejs/assets/img dist/ && netlify deploy"
+    "deploy": "yarn build && cp -r ../nodejs/assets/fonts dist/  && cp -r ../nodejs/assets/img dist/ && netlify deploy"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
@@ -20,6 +20,7 @@
     "@rollup/plugin-replace": "^2.4.2",
     "@types/js-yaml": "^4.0.1",
     "@types/node": "^15.3.1",
+    "concurrently": "^6.1.0",
     "import-sort-parser-typescript": "^6.0.0",
     "sass": "^1.32.13",
     "typescript": "^4.2.4",

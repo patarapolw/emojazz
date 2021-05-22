@@ -2,7 +2,7 @@ import yaml from 'js-yaml'
 import { createRef } from 'preact'
 import { useEffect, useState } from 'preact/hooks'
 
-import { get, loadBaseURL } from './api/get'
+import { get, loadImageIndex } from './api/get'
 import { loadIndex, search } from './api/search'
 
 export function App() {
@@ -121,7 +121,7 @@ export function App() {
   }, [selected])
 
   useEffect(() => {
-    Promise.all([loadBaseURL(), loadIndex()]).then(() => {
+    Promise.all([loadImageIndex(), loadIndex()]).then(() => {
       setReady(true)
     })
 
