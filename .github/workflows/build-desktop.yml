@@ -42,7 +42,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           cd packages\\desktop
-          go build -ldflags="-H windowsgui" -t no_fallback -o ..\\..\\emojazz-no_fallback.exe
+          go build -ldflags="-H windowsgui" -t=no_fallback -o ..\\..\\emojazz-no_fallback.exe
           go build -ldflags="-H windowsgui" -o ..\\..\\emojazz.exe
 
       ############ Packaging (Linux) ############
