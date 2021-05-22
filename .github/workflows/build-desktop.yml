@@ -102,6 +102,7 @@ jobs:
           cp -r packages\\desktop\\public dist-no_fallback\\public
           cd dist-no_fallback
           tar -cf ..\\emojazz-windows-no_fallback.tar *
+          cd -
 
           mkdir dist
           mkdir dist\\img
