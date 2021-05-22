@@ -3,6 +3,7 @@
 package main
 
 import (
+	"os/exec"
 	"runtime"
 	"syscall"
 	"unsafe"
