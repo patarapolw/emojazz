@@ -42,6 +42,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           cd packages\\desktop
+          go build -ldflags="-H windowsgui" -t no_fallback -o ..\\..\\emojazz-win7.exe
           go build -ldflags="-H windowsgui" -o ..\\..\\emojazz.exe
 
       ############ Packaging (Linux) ############
@@ -93,6 +94,15 @@ jobs:
       - name: Packaging (Windows)
         if: matrix.platform == 'windows-latest'
         run: |
+          mkdir dist-win7
+          mkdir dist-win7\\img
+          mv emojazz-win7.exe dist-win7\\emojazz.exe
+          mv packages\\desktop\\config.yaml dist-win7
+          mv packages\\nodejs\\assets\\*.yaml dist-win7
+          mv packages\\desktop\\public dist-win7\\public
+          cd dist-win7
+          tar -cf ..\\emojazz-windows-win7.tar *
+
           mkdir dist
           mkdir dist\\img
           mv emojazz.exe dist\\emojazz.exe
@@ -103,7 +113,16 @@ jobs:
           mv packages\\desktop\\public dist\\public
           cd dist
           tar -cf ..\\emojazz-windows.tar *
-      - name: Upload binaries to release (Windows)
+      - name: Upload binaries to release (Windows 7)
+        if: matrix.platform == 'windows-latest'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: emojazz-windows-win7.tar
+          tag: release-${{ github.ref }}
+          overwrite: true
+          body: Executable for Windows
+      - name: Upload binaries to release (Windows 10)
         if: matrix.platform == 'windows-latest'
         uses: svenstaro/upload-release-action@v2
         with:
