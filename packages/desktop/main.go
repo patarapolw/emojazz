@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/webview/webview"
 	"github.com/zserge/lorca"
 	"gopkg.in/yaml.v2"
 )
@@ -103,11 +102,5 @@ func main() {
 		return
 	}
 
-	w := webview.New(t.Debug)
-	defer w.Destroy()
-	w.SetTitle(t.Title)
-	w.SetSize(t.Width, t.Height, webview.HintFixed)
-	w.Navigate(fmt.Sprintf("http://%s", ln.Addr()))
-
-	w.Run()
+	fallback(t, fmt.Sprintf("http://%s", ln.Addr()))
 }

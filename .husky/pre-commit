@@ -1,5 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 . "$(dirname "$0")/_/husky.sh"
 
-cd packages/www
-yarn desktop
+if [ `git diff --quiet HEAD^ HEAD packages/www/` ]
+then
+  cd packages/www
+  yarn desktop
+fi

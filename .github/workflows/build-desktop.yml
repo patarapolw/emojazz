@@ -42,6 +42,7 @@ jobs:
         if: matrix.platform == 'windows-latest'
         run: |
           cd packages\\desktop
+          go build --tags no_fallback -ldflags="-H windowsgui" -o ..\\..\\emojazz-no_fallback.exe
           go build -ldflags="-H windowsgui" -o ..\\..\\emojazz.exe
 
       ############ Packaging (Linux) ############
@@ -93,17 +94,36 @@ jobs:
       - name: Packaging (Windows)
         if: matrix.platform == 'windows-latest'
         run: |
+          mkdir dist-no_fallback
+          mkdir dist-no_fallback\\img
+          cp emojazz-no_fallback.exe dist-no_fallback\\emojazz.exe
+          cp packages\\desktop\\config.yaml dist-no_fallback
+          cp packages\\nodejs\\assets\\*.yaml dist-no_fallback
+          cp -r packages\\desktop\\public dist-no_fallback\\public
+          cd dist-no_fallback
+          tar -cf ..\\emojazz-windows-no_fallback.tar *
+          cd -
+
           mkdir dist
           mkdir dist\\img
-          mv emojazz.exe dist\\emojazz.exe
+          cp emojazz.exe dist\\emojazz.exe
           curl https://raw.githubusercontent.com/webview/webview/master/dll/x64/WebView2Loader.dll --output dist\\WebView2Loader.dll
           curl https://raw.githubusercontent.com/webview/webview/master/dll/x64/webview.dll --output dist\\webview.dll
-          mv packages\\desktop\\config.yaml dist
-          mv packages\\nodejs\\assets\\*.yaml dist
-          mv packages\\desktop\\public dist\\public
+          cp packages\\desktop\\config.yaml dist
+          cp packages\\nodejs\\assets\\*.yaml dist
+          cp -r packages\\desktop\\public dist\\public
           cd dist
           tar -cf ..\\emojazz-windows.tar *
-      - name: Upload binaries to release (Windows)
+      - name: Upload binaries to release (Windows no_fallback)
+        if: matrix.platform == 'windows-latest'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: emojazz-windows-no_fallback.tar
+          tag: release-${{ github.ref }}
+          overwrite: true
+          body: Executable for Windows
+      - name: Upload binaries to release (Windows default)
         if: matrix.platform == 'windows-latest'
         uses: svenstaro/upload-release-action@v2
         with:
