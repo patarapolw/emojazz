@@ -1,4 +1,4 @@
-// +build no_fallback
+//+build !no_fallback
 
 package main
 
