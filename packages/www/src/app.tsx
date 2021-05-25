@@ -190,17 +190,51 @@ export function App() {
 
             <div className="row" style={{ alignItems: 'center' }}>
               <span style={{ fontSize: '1.3em' }}>Text:</span>
-              <span className="entry" style={{ fontFamily: font }}>
-                {selected}
-              </span>
+              <span> </span>
+              {/^https?:\/\//i.test(selected) ? (
+                (() => {
+                  let im = selected
+
+                  if (
+                    im
+                      .toLocaleLowerCase()
+                      .startsWith(location.origin.toLocaleLowerCase())
+                  ) {
+                    im = im.substr(location.origin.length)
+                  }
+
+                  return (
+                    <div
+                      className="entry"
+                      title="Right click to copy the image"
+                    >
+                      <img src={selected} alt={selected} />
+                    </div>
+                  )
+                })()
+              ) : (
+                <span className="entry" style={{ fontFamily: font }}>
+                  {selected}
+                </span>
+              )}
             </div>
 
             <div className="row">
-              {detail.images.map((im) => (
-                <div className="entry" title="Right click to copy the image">
-                  <img src={im} alt={im} />
-                </div>
-              ))}
+              {detail.images.map((im) => {
+                if (
+                  im
+                    .toLocaleLowerCase()
+                    .startsWith(location.origin.toLocaleLowerCase())
+                ) {
+                  im = im.substr(location.origin.length)
+                }
+
+                return (
+                  <div className="entry" title="Right click to copy the image">
+                    <img src={im} alt={im} />
+                  </div>
+                )
+              })}
             </div>
 
             <form
